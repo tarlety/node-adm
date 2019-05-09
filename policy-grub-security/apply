@@ -1,0 +1,45 @@
+#!/bin/bash
+
+# node-adm module v0.1.0
+#  usage: node-adm [module] [node] [module] ...
+# ARGUMENTS:
+#  $1 NODECTL	the command to control node.
+#  $2 NODE	which node to apply
+#  $3 HOSTFILE  where the hostfile to sync to node.
+VERSION=0.1.0
+
+HC='\033[0;93m'
+NC='\033[0m'
+
+# module:
+MODULENAME=grub-security
+
+# arguments:
+NODECTL=${1:-ws ssh}
+NODE=${2:-ws}
+GRUBUSER=${3:-""}
+GRUBPASS=${4:-""}
+
+echo -e "${HC}=========================================================================${NC}"
+echo -e "${HC}NODE-ADM MODULE: ${MODULENAME} ${VERSION}${NC}"
+echo NODECTL: ${NODECTL}
+echo GRUBUSER: ${GRUBUSER}
+echo GRUBPASS: ${GRUBPASS}
+echo
+
+if [ "${GRUBUSER}" == "" -o "${GRUBPASS}" == "" ]
+then
+	echo NO NECESSARY ARGUMENTS - SKIP THIS POLICY.
+else
+
+cat ./01_password.template | ${NODECTL} ${NODE} "sudo -n tee /etc/grub.d/01_password"
+${NODECTL} ${NODE} "
+sudo chown root:root /etc/grub.d/01_password;
+sudo chmod 500 /etc/grub.d/01_password;
+sudo sed -i -e 's/\${GRUBUSER}/'${GRUBUSER}'/' /etc/grub.d/01_password;
+sudo sed -i -e 's/\${GRUBPASSWORD}/'${GRUBPASSWORD}'/' /etc/grub.d/01_password;
+sudo sed -i -e 's/^CLASS=\"--class gnu-linux --class gnu --class os\"/CLASS=\"--class gnu-linux --class gnu --class os --unrestricted\"/' /etc/grub.d/10_linux;
+sudo update-grub;
+"
+
+fi

@@ -1,0 +1,5 @@
+#!/bin/bash
+
+iptables -A INPUT -p udp -s ${DNS1}/32 --sport 53 -j ACCEPT -m comment --comment 'node-adm'
+iptables -A INPUT -p udp -s ${DNS2}/32 --sport 53 -j ACCEPT -m comment --comment 'node-adm'
+

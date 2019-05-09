@@ -1,0 +1,42 @@
+#!/bin/bash
+
+# node-adm module v0.1.0
+#  usage: node-adm [module] [node] [module] ...
+# ARGUMENTS:
+#  $1 NODECTL		the command to control node.
+#  $2 NODE		which node to apply
+#  $3 SECURE_PORT	where the hostfile to sync to node.
+VERSION=0.1.0
+
+HC='\033[0;93m'
+NC='\033[0m'
+
+# module:
+MODULENAME=sshd
+
+# arguments:
+NODECTL=${1:-ws ssh}
+NODE=${2:-ws}
+SECURE_PORT=${3:-22}
+
+echo -e "${HC}=========================================================================${NC}"
+echo -e "${HC}NODE-ADM MODULE: ${MODULENAME} ${VERSION}${NC}"
+echo NODECTL: ${NODECTL}
+echo NODE: ${NODE}
+echo SECURE_PORT: ${SECURE_PORT}
+echo
+
+${NODECTL} ${NODE} "
+grep '^Port ${SECURE_PORT}$' /etc/ssh/sshd_config && \
+grep '^PermitRootLogin no$' /etc/ssh/sshd_config && \
+grep '^AuthenticationMethods publickey$' /etc/ssh/sshd_config && \
+grep '^PubkeyAuthentication yes$' /etc/ssh/sshd_config && \
+grep '^HostbasedAuthentication no$' /etc/ssh/sshd_config && \
+grep '^IgnoreUserKnownHosts no$' /etc/ssh/sshd_config && \
+grep '^IgnoreRhosts yes$' /etc/ssh/sshd_config && \
+grep '^PasswordAuthentication no$' /etc/ssh/sshd_config && \
+grep '^PermitEmptyPasswords no$' /etc/ssh/sshd_config && \
+grep '^ClientAliveInterval 3600$' /etc/ssh/sshd_config && \
+grep '^ClientAliveCountMax 0$' /etc/ssh/sshd_config
+" || echo -e "${HC}${MODULENAME} check FAIL${NC}"
+

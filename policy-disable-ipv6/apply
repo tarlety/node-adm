@@ -1,0 +1,35 @@
+#!/bin/bash
+
+# node-adm module v0.1.0
+#  usage: node-adm [module] [node] [module] ...
+# ARGUMENTS:
+#  $1 NODECTL	the command to control node.
+#  $2 NODE	which node to apply
+#  $3 HOSTFILE  where the hostfile to sync to node.
+VERSION=0.1.0
+
+HC='\033[0;93m'
+NC='\033[0m'
+
+# module:
+MODULENAME=disable-ipv6
+
+# arguments:
+NODECTL=${1:-ws ssh}
+NODE=${2:-ws}
+
+echo -e "${HC}=========================================================================${NC}"
+echo -e "${HC}NODE-ADM MODULE: ${MODULENAME} ${VERSION}${NC}"
+echo NODECTL: ${NODECTL}
+echo NODE: ${NODE}
+echo
+
+${NODECTL} ${NODE} "grep -F 'linux-policy 1: disable ipv6' /etc/sysctl.conf" || \
+${NODECTL} ${NODE} "
+echo '# linux-policy 1: disable ipv6' | sudo tee -a /etc/sysctl.conf;
+echo 'net.ipv6.conf.all.disable_ipv6 = 1' | sudo tee -a /etc/sysctl.conf;
+echo 'net.ipv6.conf.default.disable_ipv6 = 1' | sudo tee -a /etc/sysctl.conf;
+echo 'net.ipv6.conf.lo.disable_ipv6 = 1' | sudo tee -a /etc/sysctl.conf;
+sudo sysctl -p;
+"
+

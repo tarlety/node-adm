@@ -1,0 +1,3 @@
+#!/bin/bash
+
+iptables -A INPUT -p vrrp -j ACCEPT -m comment --comment 'node-adm'

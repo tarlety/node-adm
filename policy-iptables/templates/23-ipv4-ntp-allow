@@ -1,0 +1,4 @@
+#!/bin/bash
+
+iptables -A INPUT -p udp -s ${NTP}/32 --sport 123 -j ACCEPT -m comment --comment 'node-adm'
+
