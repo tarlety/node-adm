@@ -1,11 +1,9 @@
 #!/bin/bash
 
 # node-adm module v0.1.0
-#  usage: node-adm [module] [node] [module] ...
 # ARGUMENTS:
 #  $1 NODECTL	the command to control node.
 #  $2 NODE	which node to apply
-#  $3 HOSTFILE  where the hostfile to sync to node.
 VERSION=0.1.0
 
 HC='\033[0;93m'
@@ -24,6 +22,6 @@ echo NODECTL: ${NODECTL}
 echo NODE: ${NODE}
 echo
 
-[ "$(${NODECTL} ${NODE} "cat /proc/sys/net/ipv6/conf/all/disable_ipv6")" == "1" ] \
+[ "$(${NODECTL} ${NODE} 'cat /proc/sys/net/ipv6/conf/all/disable_ipv6')" == "1" ] \
 	|| echo -e "${HC}${MODULENAME} check FAIL${NC}"
 

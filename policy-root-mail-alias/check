@@ -1,11 +1,11 @@
 #!/bin/bash
 
 # node-adm module v0.1.0
-#  usage: node-adm [module] [node] [module] ...
 # ARGUMENTS:
 #  $1 NODECTL	the command to control node.
 #  $2 NODE	which node to apply
-#  $3 HOSTFILE  where the hostfile to sync to node.
+#  $3 OPERATOR  the operator account of the node.
+#  $4 MAILTO    the mail address of the operator.
 VERSION=0.1.0
 
 HC='\033[0;93m'

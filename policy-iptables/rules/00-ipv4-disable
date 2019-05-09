@@ -1,0 +1,7 @@
+#!/bin/bash
+
+#iptables -F INPUT
+#iptables -P INPUT DROP
+
+echo "y" | sudo ufw enable
+sudo ufw default deny incoming

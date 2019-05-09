@@ -10,7 +10,7 @@ HC='\033[0;93m'
 NC='\033[0m'
 
 # module:
-MODULENAME=lock-cronjobs
+MODULENAME=hardware
 
 # arguments:
 NODECTL=${1:-ws ssh}
@@ -22,5 +22,15 @@ echo NODECTL: ${NODECTL}
 echo NODE: ${NODE}
 echo
 
-${NODECTL} ${NODE} "echo ALL | sudo tee /etc/cron.deny"
+echo "Hostname: `hostname`"
+echo "Date: `date`"
+
+echo -e "${HC}$ lscpu${NC}"
+lscpu
+
+echo -e "${HC}$ lsmem${NC}"
+lsmem
+
+echo -e "${HC}$ lsblk (except loop devices)${NC}"
+lsblk | grep -v loop
 

@@ -4,23 +4,33 @@
 # ARGUMENTS:
 #  $1 NODECTL	the command to control node.
 #  $2 NODE	which node to apply
+#  $3 SSHPORT	which ssh port to allow
 VERSION=0.1.0
 
 HC='\033[0;93m'
 NC='\033[0m'
 
 # module:
-MODULENAME=lock-cronjobs
+MODULENAME=iptables
 
 # arguments:
 NODECTL=${1:-ws ssh}
 NODE=${2:-ws}
+SSHPORT=${3:-22}
 
 echo -e "${HC}=========================================================================${NC}"
 echo -e "${HC}NODE-ADM MODULE: ${MODULENAME} ${VERSION}${NC}"
 echo NODECTL: ${NODECTL}
 echo NODE: ${NODE}
+echo SSHPORT: ${SSHPORT}
 echo
 
-${NODECTL} ${NODE} "echo ALL | sudo tee /etc/cron.deny"
+export SSHPORT
+
+for RULE in rules/*
+do
+	cat ${RULE} | \
+		sed -e "s/\${SSHPORT}/${SSHPORT}/" | \
+		${NODECTL} ${NODE} "sudo -n bash -s"
+done
 

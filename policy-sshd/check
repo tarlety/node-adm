@@ -1,7 +1,6 @@
 #!/bin/bash
 
 # node-adm module v0.1.0
-#  usage: node-adm [module] [node] [module] ...
 # ARGUMENTS:
 #  $1 NODECTL		the command to control node.
 #  $2 NODE		which node to apply

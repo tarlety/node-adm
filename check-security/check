@@ -1,0 +1,62 @@
+#!/bin/bash
+
+# node-adm module v0.1.0
+# ARGUMENTS:
+#  $1 NODECTL	the command to control node.
+#  $2 NODE	which node to apply
+VERSION=0.1.0
+
+HC='\033[0;93m'
+NC='\033[0m'
+
+# module:
+MODULENAME=security
+
+# arguments:
+NODECTL=${1:-ws ssh}
+NODE=${2:-ws}
+
+echo -e "${HC}=========================================================================${NC}"
+echo -e "${HC}NODE-ADM MODULE: ${MODULENAME} ${VERSION}${NC}"
+echo NODECTL: ${NODECTL}
+echo NODE: ${NODE}
+echo
+
+echo "Hostname: `hostname`"
+echo "Date: `date`"
+
+echo -e "${HC}$ sudo netstat -tulpn${NC}"
+sudo netstat -tulpn
+
+echo -e "${HC}$ change -l (all users)${NC}"
+ACCOUNTS=`cat /etc/passwd | grep -v /usr/sbin/nologin | grep -v /bin/false | grep -v /bin/sync | cut -d ':' -f 1`
+for user in $ACCOUNTS
+do
+	echo "Account: $user"
+	sudo chage -l $user
+done
+
+echo -e "${HC}$ sudo iptables -L -vn${NC}"
+sudo iptables -L -vn
+
+echo -e "${HC}Is there any empty passwords?${NC}"
+EMPTYPASSWORDS=`sudo cat /etc/shadow | awk -F: '($2==""){print $1}'`
+if [ "${EMPTYPASSWORDS}" != "" ]
+then
+	echo -e "${HC}${MODULENAME} check FAIL${NC}"
+	echo "accounts with empty password:"
+	echo ${EMPTYPASSWORDS}
+fi
+
+echo -e "${HC}Is there any sudoers?${NC}"
+[ "`ls /etc/sudoers.d`" == "README" ] \
+	|| echo -e "${HC}${MODULENAME} check FAIL${NC}"
+
+echo -e "${HC}Is log filesize abnormal?${NC}"
+ls -al /var/log/kern.log
+ls -al /var/log/auth.log
+ls -al /var/log/wtmp
+
+echo -e "${HC}The login history.${NC}"
+last
+

@@ -10,7 +10,7 @@ HC='\033[0;93m'
 NC='\033[0m'
 
 # module:
-MODULENAME=lock-cronjobs
+MODULENAME=iptables
 
 # arguments:
 NODECTL=${1:-ws ssh}
@@ -22,5 +22,5 @@ echo NODECTL: ${NODECTL}
 echo NODE: ${NODE}
 echo
 
-${NODECTL} ${NODE} "echo ALL | sudo tee /etc/cron.deny"
-
+[ "$(${NODECTL} ${NODE} 'sudo ufw status|head -1')" == "Status: active" ] \
+	|| echo -e "${HC}${MODULENAME} check FAIL${NC}"
