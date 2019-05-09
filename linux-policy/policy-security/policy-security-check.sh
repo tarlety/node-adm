@@ -1,12 +1,5 @@
 #!/bin/bash
 
-if [ -e ~/.secret/.env/env ]
-then
-	. ~/.secret/.env/env
-else
-	echo "missing secret env"
-fi
-
 echo Security Check Report
 echo ===
 
@@ -77,13 +70,4 @@ echo
 
 echo $ lsscsi
 lsscsi
-
-echo
-echo \#\# Grub secure check
-echo
-
-echo checking grub 01_password...
-[ -e /etc/grub.d/01_password ] || echo "result: FAIL"
-echo checking grub 10_linux...
-grep 'unrestricted' /etc/grub.d/10_linux || echo "result: FAIL"
 
