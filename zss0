@@ -303,6 +303,8 @@ case $1 in
 		;;
 	"sshcopy")
 		shift
+		NODES=${1:-${NODES}}
+
 		for NODE in ${NODES}
 		do
 			ssh-copy-id -p ${SECURE_PORT} -i ~/.ssh/id_rsa.pub ${NODE}
@@ -338,8 +340,10 @@ case $1 in
 		for NODE in ${NODES}
 		do
 			./policy-hosts/apply "${NODECTL}" "${NODE}" "${HOSTFILE}"
-			./policy-disable-ipv6/apply "${NODECTL}" "${NODE}"
-			./policy-iptables/apply "${NODECTL}" "${NODE}" "${SECURE_PORT}"
+			./install-update/install "${NODECTL}" "${NODE}"
+			./install-docker/install "${NODECTL}" "${NODE}" "${OPERATOR}"
+			./install-logwatch/install "${NODECTL}" "${NODE}" "${SMTP}"
+			./install-kernel/install "${NODECTL}" "${NODE}"
 			./policy-sshd/apply "${NODECTL}" "${NODE}" "${SECURE_PORT}"
 			./policy-ntp/apply "${NODECTL}" "${NODE}" "${NTP}"
 			./policy-root-no-login/apply "${NODECTL}" "${NODE}"
@@ -347,12 +351,10 @@ case $1 in
 			./policy-lock-cronjobs/apply "${NODECTL}" "${NODE}"
 			./policy-grub-security/apply "${NODECTL}" "${NODE}" "${GRUBUSER}" "${GRUBPASS}"
 			./policy-logrorate/apply "${NODECTL}" "${NODE}"
-			./install-update/install "${NODECTL}" "${NODE}"
-			./install-docker/install "${NODECTL}" "${NODE}" "${OPERATOR}"
-			./install-logwatch/install "${NODECTL}" "${NODE}" "${SMTP}"
-			./install-kernel/install "${NODECTL}" "${NODE}"
 			./policy-docker-log-rotate/apply "${NODECTL}" "${NODE}"
 			./policy-update-notification/apply "${NODECTL}" "${NODE}"
+			./policy-disable-ipv6/apply "${NODECTL}" "${NODE}"
+			./policy-iptables/apply "${NODECTL}" "${NODE}" "${SECURE_PORT}"
 		done
 		;;
 	"check")
@@ -362,8 +364,6 @@ case $1 in
 		for NODE in ${NODES}
 		do
 			./policy-hosts/check "${NODECTL}" "${NODE}" "${HOSTFILE}"
-			./policy-disable-ipv6/check "${NODECTL}" "${NODE}"
-			./policy-iptables/check "${NODECTL}" "${NODE}"
 			./policy-sshd/check "${NODECTL}" "${NODE}" "${SECURE_PORT}"
 			./policy-ntp/check "${NODECTL}" "${NODE}" "${NTP}"
 			./policy-root-no-login/check "${NODECTL}" "${NODE}"
@@ -373,6 +373,8 @@ case $1 in
 			./policy-logrorate/check "${NODECTL}" "${NODE}"
 			./policy-docker-log-rotate/check "${NODECTL}" "${NODE}"
 			./policy-update-notification/check "${NODECTL}" "${NODE}"
+			./policy-disable-ipv6/check "${NODECTL}" "${NODE}"
+			./policy-iptables/check "${NODECTL}" "${NODE}"
 			./check-security/check "${NODECTL}" "${NODE}"
 			./check-port-inspect/check "${NODECTL}" "${NODE}"
 			./check-hardware/check "${NODECTL}" "${NODE}"
@@ -393,7 +395,7 @@ case $1 in
 		echo $(basename $0) config ...
 		echo $(basename $0) secret-create
 		echo $(basename $0) "state [list/save/load] [config/secret/data] [state_name, ex: date-stage-env]"
-		echo $(basename $0) "sshcopy"
+		echo $(basename $0) "sshcopy [node]"
 		echo $(basename $0) "operate [on/off]"
 		echo $(basename $0) "[apply/check/reboot] [node]"
 		;;
