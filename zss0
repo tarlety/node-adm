@@ -47,7 +47,7 @@ DEFAULT_BASE_DATA=nop
 DEFAULT_NODES="u1 u2 u3"
 DEFAULT_NODECTL="ssh -p \${SECURE_PORT}"
 DEFAULT_HOSTFILE="/etc/hosts"
-DEFAULT_SECURE_PORT="32222"
+DEFAULT_SECURE_PORT="2201"
 DEFAULT_DNS1="8.8.8.8"
 DEFAULT_DNS2="8.8.4.4"
 DEFAULT_NTP="91.189.89.199"
@@ -316,15 +316,15 @@ case $1 in
 		"on")
 			for NODE in ${NODES}
 			do
-				ssh -t ${OPERATOR}@${NODE} -p ${SECURE_PORT} \
+				${NODECTL} ${NODE} \
 					"echo ${OPERATOR} ALL=\(ALL\) NOPASSWD: ALL | sudo tee /etc/sudoers.d/${OPERATOR}"
 			done
 			;;
 		"off")
 			for NODE in ${NODES}
 			do
-				ssh -t ${OPERATOR}@${NODE} -p ${SECURE_PORT} \
-					"sudo rm /etc/sudoers.d/${OPERATOR}"
+				${NODECTL} ${NODE} \
+					"sudo -n rm /etc/sudoers.d/${OPERATOR}"
 			done
 			;;
 		esac
