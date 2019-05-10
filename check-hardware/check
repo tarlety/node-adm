@@ -22,15 +22,18 @@ echo NODECTL: ${NODECTL}
 echo NODE: ${NODE}
 echo
 
-echo "Hostname: `hostname`"
-echo "Date: `date`"
-
 echo -e "${HC}$ lscpu${NC}"
+${NODECTL} ${NODE} "
 lscpu
+"
 
 echo -e "${HC}$ lsmem${NC}"
+${NODECTL} ${NODE} "
 lsmem
+"
 
 echo -e "${HC}$ lsblk (except loop devices)${NC}"
+${NODECTL} ${NODE} "
 lsblk | grep -v loop
+"
 

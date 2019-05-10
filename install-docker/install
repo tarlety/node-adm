@@ -11,7 +11,7 @@ HC='\033[0;93m'
 NC='\033[0m'
 
 # module:
-MODULENAME=update
+MODULENAME=docker
 
 # arguments:
 NODECTL=${1:-ws ssh}

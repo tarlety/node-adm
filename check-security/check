@@ -22,25 +22,26 @@ echo NODECTL: ${NODECTL}
 echo NODE: ${NODE}
 echo
 
-echo "Hostname: `hostname`"
-echo "Date: `date`"
-
 echo -e "${HC}$ sudo netstat -tulpn${NC}"
+${NODECTL} ${NODE} "
 sudo netstat -tulpn
+"
 
 echo -e "${HC}$ change -l (all users)${NC}"
-ACCOUNTS=`cat /etc/passwd | grep -v /usr/sbin/nologin | grep -v /bin/false | grep -v /bin/sync | cut -d ':' -f 1`
+ACCOUNTS="$(${NODECTL} ${NODE} 'cat /etc/passwd | grep -v /usr/sbin/nologin | grep -v /bin/false | grep -v /bin/sync | cut -d: -f 1')"
 for user in $ACCOUNTS
 do
-	echo "Account: $user"
-	sudo chage -l $user
+	echo "Account: ${user}"
+	${NODECTL} ${NODE} "sudo chage -l ${user}"
 done
 
 echo -e "${HC}$ sudo iptables -L -vn${NC}"
+${NODECTL} ${NODE} "
 sudo iptables -L -vn
+"
 
 echo -e "${HC}Is there any empty passwords?${NC}"
-EMPTYPASSWORDS=`sudo cat /etc/shadow | awk -F: '($2==""){print $1}'`
+EMPTYPASSWORDS="$(${NODECTL} ${NODE} 'sudo cat /etc/shadow' | awk -F: '($2==""){print $1}')"
 if [ "${EMPTYPASSWORDS}" != "" ]
 then
 	echo -e "${HC}${MODULENAME} check FAIL${NC}"
@@ -49,14 +50,19 @@ then
 fi
 
 echo -e "${HC}Is there any sudoers?${NC}"
-[ "`ls /etc/sudoers.d`" == "README" ] \
+${NODECTL} ${NODE} 'ls /etc/sudoers.d'
+[ "$(${NODECTL} ${NODE} 'ls /etc/sudoers.d')" == "README" ] \
 	|| echo -e "${HC}${MODULENAME} check FAIL${NC}"
 
 echo -e "${HC}Is log filesize abnormal?${NC}"
-ls -al /var/log/kern.log
-ls -al /var/log/auth.log
-ls -al /var/log/wtmp
+${NODECTL} ${NODE} "
+ls -al /var/log/kern.log ;
+ls -al /var/log/auth.log ;
+ls -al /var/log/wtmp ;
+"
 
 echo -e "${HC}The login history.${NC}"
+${NODECTL} ${NODE} "
 last
+"
 
