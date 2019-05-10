@@ -4,31 +4,30 @@
 # ARGUMENTS:
 #  $1 NODECTL	the command to control node.
 #  $2 NODE	which node to apply
-#  $3 SSHPORT	which ssh port to allow
 VERSION=0.1.0
 
 HC='\033[0;93m'
 NC='\033[0m'
 
 # module:
-MODULENAME=iptables
+MODULENAME=kernel
 
 # arguments:
 NODECTL=${1:-ws ssh}
 NODE=${2:-ws}
-SSHPORT=${3:-22}
 
 echo -e "${HC}=========================================================================${NC}"
 echo -e "${HC}NODE-ADM MODULE: ${MODULENAME} ${VERSION}${NC}"
 echo NODECTL: ${NODECTL}
 echo NODE: ${NODE}
-echo SSHPORT: ${SSHPORT}
 echo
 
-for RULE in $(dirname $0)/rules/*
-do
-	cat ${RULE} | \
-		sed -e "s/\${SSHPORT}/${SSHPORT}/" | \
-		${NODECTL} ${NODE} "sudo -n bash -s"
-done
+${NODECTL} ${NODE} "
+grep -F 'linux-policy 1: increase UDP buffer' /etc/sysctl.conf || {
+	echo '# linux-policy 1: increase UDP buffer' | sudo tee -a /etc/sysctl.conf ;
+	echo 'net.core.rmem_max=26214400' | sudo tee -a /etc/sysctl.conf ;
+	echo 'net.core.rmem_default=26214400' | sudo tee -a /etc/sysctl.conf ;
+	sudo sysctl -p ;
+} ;
+"
 

@@ -1,5 +1,0 @@
-#!/bin/bash
-
-# iptables -A INPUT -m multiport -p udp --dport 137,138,67,20031,2463 -j DROP -m comment --comment 'node-adm'
-# iptables -A INPUT -d 224.0.0.1/32 -j DROP -m comment --comment 'node-adm'
-

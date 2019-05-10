@@ -1,6 +1,0 @@
-#!/bin/bash
-
-# iptables -A INPUT -i lo -j ACCEPT -m comment --comment 'node-adm'
-# iptables -A INPUT -p icmp -j ACCEPT -m comment --comment 'node-adm'
-# iptables -A INPUT -p tcp -m state --state ESTABLISHED -j ACCEPT -m comment --comment 'node-adm'
-

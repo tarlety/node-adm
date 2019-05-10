@@ -3,5 +3,6 @@
 #iptables -F INPUT
 #iptables -P INPUT DROP
 
+sudo ufw allow in 22/tcp
 echo "y" | sudo ufw enable
 sudo ufw default deny incoming

@@ -1,0 +1,39 @@
+#!/bin/bash
+
+# node-adm module v0.1.0
+# ARGUMENTS:
+#  $1 NODECTL	the command to control node.
+#  $2 NODE	which node to apply
+#  $3 SMTP	the mail server address
+VERSION=0.1.0
+
+HC='\033[0;93m'
+NC='\033[0m'
+
+# module:
+MODULENAME=logwatch
+
+# arguments:
+NODECTL=${1:-ws ssh}
+NODE=${2:-ws}
+SMTP=${3:-localhost}
+
+echo -e "${HC}=========================================================================${NC}"
+echo -e "${HC}NODE-ADM MODULE: ${MODULENAME} ${VERSION}${NC}"
+echo NODECTL: ${NODECTL}
+echo NODE: ${NODE}
+echo SMTP: ${SMTP}
+echo
+
+# https://serverfault.com/questions/143968/automate-the-installation-of-postfix-on-ubuntu
+# set logwatch/postfix to use smtp
+${NODECTL} ${NODE} "
+sudo debconf-set-selections <<< 'postfix postfix/relayhost string ${SMTP}';
+sudo debconf-set-selections <<< 'postfix postfix/mailname string $(hostname)';
+sudo debconf-set-selections <<< 'postfix postfix/main_mailer_type string "Satellite system"';
+sudo apt install logwatch -y;
+"
+
+cat $(dirname $0)/files/logwatch.conf | ${NODECTL} ${NODE} "sudo tee /etc/logwatch/conf"
+cat $(dirname $0)/files/kernel.conf | ${NODECTL} ${NODE} "sudo tee /etc/logwatch/conf/services"
+

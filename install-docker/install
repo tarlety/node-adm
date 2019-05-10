@@ -4,31 +4,31 @@
 # ARGUMENTS:
 #  $1 NODECTL	the command to control node.
 #  $2 NODE	which node to apply
-#  $3 SSHPORT	which ssh port to allow
+#  $3 OPERATOR	the operator account of the node.
 VERSION=0.1.0
 
 HC='\033[0;93m'
 NC='\033[0m'
 
 # module:
-MODULENAME=iptables
+MODULENAME=update
 
 # arguments:
 NODECTL=${1:-ws ssh}
 NODE=${2:-ws}
-SSHPORT=${3:-22}
+OPERATOR=${3:$(whoami)}
 
 echo -e "${HC}=========================================================================${NC}"
 echo -e "${HC}NODE-ADM MODULE: ${MODULENAME} ${VERSION}${NC}"
 echo NODECTL: ${NODECTL}
 echo NODE: ${NODE}
-echo SSHPORT: ${SSHPORT}
+echo OPERATOR: ${OPERATOR}
 echo
 
-for RULE in $(dirname $0)/rules/*
-do
-	cat ${RULE} | \
-		sed -e "s/\${SSHPORT}/${SSHPORT}/" | \
-		${NODECTL} ${NODE} "sudo -n bash -s"
-done
+${NODECTL} ${NODE} "
+sudo apt install docker.io -y ;
+sudo systemctl enable docker ;
+sudo ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf ;
+sudo usermod -a -G docker ${OPERATOR} ;
+"
 
