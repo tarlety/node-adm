@@ -19,6 +19,7 @@ NODE=${2:-ws}
 echo -e "${HC}=========================================================================${NC}"
 echo -e "${HC}NODE-ADM MODULE: ${MODULENAME} ${VERSION}${NC}"
 echo NODECTL: ${NODECTL}
+echo NODE: ${NODE}
 echo
 
 ${NODECTL} ${NODE} "[ -e /etc/grub.d/01_password ]" \

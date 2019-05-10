@@ -23,6 +23,7 @@ GRUBPASS=${4:-""}
 echo -e "${HC}=========================================================================${NC}"
 echo -e "${HC}NODE-ADM MODULE: ${MODULENAME} ${VERSION}${NC}"
 echo NODECTL: ${NODECTL}
+echo NODE: ${NODE}
 echo GRUBUSER: ${GRUBUSER}
 echo GRUBPASS: ${GRUBPASS}
 echo

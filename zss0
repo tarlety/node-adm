@@ -339,6 +339,8 @@ case $1 in
 		shift
 		for NODE in ${NODES}
 		do
+			echo =========================================================================
+			echo NODE:${NODE} applying...
 			./policy-hosts/apply "${NODECTL}" "${NODE}" "${HOSTFILE}"
 			./install-update/install "${NODECTL}" "${NODE}"
 			./install-docker/install "${NODECTL}" "${NODE}" "${OPERATOR}"
@@ -363,6 +365,8 @@ case $1 in
 
 		for NODE in ${NODES}
 		do
+			echo =========================================================================
+			echo NODE:${NODE} checking...
 			./policy-hosts/check "${NODECTL}" "${NODE}" "${HOSTFILE}"
 			./policy-sshd/check "${NODECTL}" "${NODE}" "${SECURE_PORT}"
 			./policy-ntp/check "${NODECTL}" "${NODE}" "${NTP}"
@@ -386,6 +390,8 @@ case $1 in
 
 		for NODE in ${NODES}
 		do
+			echo =========================================================================
+			echo NODE:${NODE} rebooting...
 			${NODECTL} ${NODE} "sudo shutdown -r now"
 		done
 		;;

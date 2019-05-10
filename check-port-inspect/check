@@ -23,4 +23,4 @@ echo NODE: ${NODE}
 echo
 
 ${NODECTL} ${NODE} "sudo netstat -tuplen" | \
-	sed 's/  */ /g' | grep -E '^tcp|^udp' | cut -d ' ' -f 4 | rev | cut -d ':' -f 1 | rev | sort -nu
+	grep -v '127.0.0.' | sed 's/  */ /g' | grep -E '^tcp|^udp' | cut -d ' ' -f 4 | rev | cut -d ':' -f 1 | rev | sort -nu
