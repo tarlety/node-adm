@@ -88,10 +88,8 @@ case $1 in
 		echo "## SCRIPT NAME: ${SCRIPTNAME}"
 		echo - VERSION: ${VERSION}
 		echo - STORE: ${STORE}
-		echo - SECRET: ${SECRET}
+		echo - SECRET: $SECRET $(echo $(cat $SALT 2>/dev/null) $(cat ${SECRET}/* | sha256sum 2>/dev/null) | sha1sum | cut -c1-8)
 		echo - CONFIG: ${CONFIG}
-		echo - GRUBUSER_FILE: $(cat ${GRUBUSER_FILE} ${SALT} 2>/dev/null | sha1sum | cut -c1-8)
-		echo - GRUBPASS_FILE: $(cat ${GRUBPASS_FILE} ${SALT} 2>/dev/null | sha1sum | cut -c1-8)
 		echo - NODES: ${NODES}
 		echo - NODECTL: ${NODECTL}
 		echo - HOSTFILE: ${HOSTFILE}
@@ -222,7 +220,6 @@ case $1 in
 		echo "$GRUBPASS" | gpg -ear ${GPGKEYNAME} -o ${GRUBPASS_FILE}
 
 		gpg --gen-random --armor 2 16 | base64 | cut -c1-16 > ${SALT}
-		$0 env > ${CONFIG}/env
 		;;
 	"state")
 		shift
