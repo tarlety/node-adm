@@ -23,8 +23,8 @@ echo NODE: ${NODE}
 echo
 
 ${NODECTL} ${NODE} "
-grep -F 'linux-policy 1: increase UDP buffer' /etc/sysctl.conf || {
-	echo '# linux-policy 1: increase UDP buffer' | sudo tee -a /etc/sysctl.conf ;
+grep -F 'NODE-ADM MODULE ${MODULENAME} 0: increase UDP buffer' /etc/sysctl.conf || {
+	echo '# NODE-ADM MODULE ${MODULENAME} 0: increase UDP buffer' | sudo tee -a /etc/sysctl.conf ;
 	echo 'net.core.rmem_max=26214400' | sudo tee -a /etc/sysctl.conf ;
 	echo 'net.core.rmem_default=26214400' | sudo tee -a /etc/sysctl.conf ;
 	sudo sysctl -p ;
