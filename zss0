@@ -46,6 +46,7 @@ DEFAULT_BASE_SECRET=nop
 DEFAULT_BASE_DATA=nop
 DEFAULT_NODES="u1 u2 u3"
 DEFAULT_NODECTL="ssh -p \${SECURE_PORT}"
+DEFAULT_NODECTL_TTY="\${NODECTL} -t"
 DEFAULT_HOSTFILE="/etc/hosts"
 DEFAULT_SECURE_PORT="2201"
 DEFAULT_DNS1="8.8.8.8"
@@ -66,6 +67,7 @@ BASE_SECRET=`cat ${CONFIG}/base_secret 2>/dev/null`
 BASE_DATA=`cat ${CONFIG}/base_data 2>/dev/null`
 NODES=`cat ${CONFIG}/nodes 2>/dev/null`
 NODECTL=`cat ${CONFIG}/nodectl 2>/dev/null`
+NODECTL_TTY=`cat ${CONFIG}/nodectl_tty 2>/dev/null`
 HOSTFILE=`cat ${CONFIG}/hostfile 2>/dev/null`
 SECURE_PORT=`cat ${CONFIG}/secure_port 2>/dev/null`
 DNS1=`cat ${CONFIG}/dns1 2>/dev/null`
@@ -92,6 +94,7 @@ case $1 in
 		echo - CONFIG: ${CONFIG}
 		echo - NODES: ${NODES}
 		echo - NODECTL: ${NODECTL}
+		echo - NODECTL_TTY: ${NODECTL_TTY}
 		echo - HOSTFILE: ${HOSTFILE}
 		echo - SECURE_PORT: ${SECURE_PORT}
 		echo - DNS1: ${DNS1}
@@ -128,6 +131,11 @@ case $1 in
 				shift
 				NODECTL=${1:-${DEFAULT_NODECTL}}
 				echo ${NODECTL} > ${CONFIG}/nodectl
+				;;
+			"nodectl_tty")
+				shift
+				NODECTL_TTY=${1:-${DEFAULT_NODECTL_TTY}}
+				echo ${NODECTL_TTY} > ${CONFIG}/nodectl_tty
 				;;
 			"hostfile")
 				shift
@@ -179,31 +187,31 @@ case $1 in
 				echo ""
 				echo "config names:"
 				echo "	store		The local repository for state."
-				echo "			Ex: $(basename $0) config store ${DEFAULT_STORE}"
-				echo "	domain		the base domain name of the service."
-				echo "			Ex: $(basename $0) config domain ${DEFAULT_DOMAIN}"
-				echo "  nodes		which nodes to apply."
-				echo "			Ex: $(basename $0) config nodes ${DEFAULT_NODES}"
-				echo "  nodectl		the command to control the node."
-				echo "			Ex: $(basename $0) config nodectl ${DEFAULT_NODECTL}"
-				echo "  hostfile	which hosts file is used for all nodes."
-				echo "			Ex: $(basename $0) config hostfile ${DEFAULT_HOSTFILE}"
-				echo "  secure_port	re-configuring the SSH secure port for all nodes."
-				echo "			Ex: $(basename $0) config secure_port ${DEFAULT_SECURE_PORT}"
-				echo "  dns1		which DNS is used."
-				echo "			Ex: $(basename $0) config dns1 ${DEFAULT_DNS1}"
-				echo "  dns2		which DNS is used."
-				echo "			Ex: $(basename $0) config dns2 ${DEFAULT_DNS2}"
-				echo "  ntp		which NTP is used."
-				echo "			Ex: $(basename $0) config ntp ${DEFAULT_NTP}"
-				echo "  smtp		which SMTP is used."
-				echo "			Ex: $(basename $0) config smtp ${DEFAULT_SMTP}"
-				echo "  operator	the operator account of all nodes."
-				echo "			Ex: $(basename $0) config operator ${DEFAULT_OPERATOR}"
-				echo "  mailto		the mail address to recieve notifications."
-				echo "			Ex: $(basename $0) config mailto ${DEFAULT_MAILTO}"
+				echo "			Ex: $(basename $0) config store '${DEFAULT_STORE}'"
+				echo "	nodes		which nodes to apply."
+				echo "			Ex: $(basename $0) config nodes '${DEFAULT_NODES}'"
+				echo "	nodectl		the command to control the node."
+				echo "			Ex: $(basename $0) config nodectl '${DEFAULT_NODECTL}'"
+				echo " 	nodectl_tty	the command to control the node with tty allocatation."
+				echo "			Ex: $(basename $0) config nodectl_tty '${DEFAULT_NODECTL_TTY}'"
+				echo " 	hostfile	which hosts file is used for all nodes."
+				echo "			Ex: $(basename $0) config hostfile '${DEFAULT_HOSTFILE}'"
+				echo " 	secure_port	re-configuring the SSH secure port for all nodes."
+				echo "			Ex: $(basename $0) config secure_port '${DEFAULT_SECURE_PORT}'"
+				echo " 	dns1		which DNS is used."
+				echo "			Ex: $(basename $0) config dns1 '${DEFAULT_DNS1}'"
+				echo " 	dns2		which DNS is used."
+				echo "			Ex: $(basename $0) config dns2 '${DEFAULT_DNS2}'"
+				echo " 	ntp		which NTP is used."
+				echo "			Ex: $(basename $0) config ntp '${DEFAULT_NTP}'"
+				echo " 	smtp		which SMTP is used."
+				echo "			Ex: $(basename $0) config smtp '${DEFAULT_SMTP}'"
+				echo " 	operator	the operator account of all nodes."
+				echo "			Ex: $(basename $0) config operator '${DEFAULT_OPERATOR}'"
+				echo " 	mailto		the mail address to recieve notifications."
+				echo "			Ex: $(basename $0) config mailto '${DEFAULT_MAILTO}'"
 				echo "	gpg		configure which gpg key to use."
-				echo "			Ex: $(basename $0) config gpg ${DEFAULT_GPGKEYNAME}"
+				echo "			Ex: $(basename $0) config gpg '${DEFAULT_GPGKEYNAME}'"
 				;;
 		esac
 		;;
@@ -304,7 +312,7 @@ case $1 in
 
 		for NODE in ${NODES}
 		do
-			ssh-copy-id -p ${SECURE_PORT} -i ~/.ssh/id_rsa.pub ${NODE}
+			ssh-copy-id -i ~/.ssh/id_rsa.pub ${NODE}
 		done
 		;;
 	"operate")
@@ -313,14 +321,14 @@ case $1 in
 		"on")
 			for NODE in ${NODES}
 			do
-				${NODECTL} ${NODE} \
+				${NODECTL_TTY} ${NODE} \
 					"echo ${OPERATOR} ALL=\(ALL\) NOPASSWD: ALL | sudo tee /etc/sudoers.d/${OPERATOR}"
 			done
 			;;
 		"off")
 			for NODE in ${NODES}
 			do
-				${NODECTL} ${NODE} \
+				${NODECTL_TTY} ${NODE} \
 					"sudo -n rm /etc/sudoers.d/${OPERATOR}"
 			done
 			;;
