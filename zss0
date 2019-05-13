@@ -306,13 +306,24 @@ case $1 in
 				;;
 		esac
 		;;
+	"sshclean")
+		shift
+		NODES=${1:-${NODES}}
+
+		for NODE in ${NODES}
+		do
+			NODEIP=$(grep "[\t ]*${NODE}$" /etc/hosts | cut -d' ' -f1)
+			ssh-keygen -f ~/.ssh/known_hosts -R "${NODE}"
+			ssh-keygen -f ~/.ssh/known_hosts -R "${NODEIP}"
+		done
+		;;
 	"sshcopy")
 		shift
 		NODES=${1:-${NODES}}
 
 		for NODE in ${NODES}
 		do
-			ssh-copy-id -i ~/.ssh/id_rsa.pub ${NODE}
+			ssh-copy-id -i ~/.ssh/id_rsa.pub "${NODE}"
 		done
 		;;
 	"operate")
@@ -407,7 +418,7 @@ case $1 in
 		echo $(basename $0) config ...
 		echo $(basename $0) secret-create
 		echo $(basename $0) "state [list/save/load] [config/secret/data] [state_name, ex: date-stage-env]"
-		echo $(basename $0) "sshcopy [node]"
+		echo $(basename $0) "[sshclean/sshcopy] [node]"
 		echo $(basename $0) "operate [on/off]"
 		echo $(basename $0) "[apply/check/reboot] [node]"
 		;;
