@@ -345,6 +345,14 @@ case $1 in
 			;;
 		esac
 		;;
+	"exec")
+		shift
+		COMMANDS=$*
+		for NODE in ${NODES}
+		do
+			eval ${NODECTL} ${NODE} \"${COMMANDS}\"
+		done
+		;;
 	"apply")
 		shift
 		NODES=${1:-${NODES}}
@@ -420,6 +428,7 @@ case $1 in
 		echo $(basename $0) "state [list/save/load] [config/secret/data] [state_name, ex: date-stage-env]"
 		echo $(basename $0) "[sshclean/sshcopy] [node]"
 		echo $(basename $0) "operate [on/off]"
+		echo $(basename $0) "exec [commands]"
 		echo $(basename $0) "[apply/check/reboot] [node]"
 		;;
 esac
