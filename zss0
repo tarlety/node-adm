@@ -323,7 +323,7 @@ case $1 in
 
 		for NODE in ${NODES}
 		do
-			while ! [[ $(nc -w 5 "${NODE}" 221 <<< "\0" ) =~ "OpenSSH" ]] && \
+			while ! [[ $(nc -w 5 "${NODE}" 22 <<< "\0" ) =~ "OpenSSH" ]] && \
 				! [[ $(nc -w 5 "${NODE}" ${SECURE_PORT} <<< "\0" ) =~ "OpenSSH" ]]
 			do
 				echo waiting ${NODE}...
