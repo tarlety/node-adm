@@ -316,13 +316,39 @@ case $1 in
 				;;
 		esac
 		;;
+	"sshclean")
+		shift
+		NODES=${1:-${NODES}}
+
+		for NODE in ${NODES}
+		do
+			NODEIP=$(grep "[\t ]*${NODE}$" /etc/hosts | cut -d' ' -f1)
+			ssh-keygen -f ~/.ssh/known_hosts -R "${NODE}"
+			ssh-keygen -f ~/.ssh/known_hosts -R "${NODEIP}"
+		done
+		;;
+	"sshwait")
+		shift
+		NODES=${1:-${NODES}}
+
+		for NODE in ${NODES}
+		do
+			while ! [[ $(nc -w 5 "${NODE}" 22 <<< "\0" ) =~ "OpenSSH" ]] && \
+				! [[ $(nc -w 5 "${NODE}" ${SECURE_PORT} <<< "\0" ) =~ "OpenSSH" ]]
+			do
+				echo waiting ${NODE}...
+				sleep 5
+			done
+			echo ${NODE} is ready.
+		done
+		;;
 	"sshcopy")
 		shift
 		NODES=${1:-${NODES}}
 
 		for NODE in ${NODES}
 		do
-			ssh-copy-id -i ~/.ssh/id_rsa.pub ${NODE}
+			ssh-copy-id -i ~/.ssh/id_rsa.pub "${NODE}"
 		done
 		;;
 	"operate")
@@ -343,6 +369,14 @@ case $1 in
 			done
 			;;
 		esac
+		;;
+	"exec")
+		shift
+		COMMANDS=$*
+		for NODE in ${NODES}
+		do
+			eval ${NODECTL} ${NODE} \"${COMMANDS}\"
+		done
 		;;
 	"apply")
 		shift
@@ -418,8 +452,9 @@ case $1 in
 		echo $(basename $0) config ...
 		echo $(basename $0) secret-create
 		echo $(basename $0) "state [list/save/load] [config/secret/data] [state_name, ex: date-stage-env]"
-		echo $(basename $0) "sshcopy [node]"
+		echo $(basename $0) "[sshclean/sshwait/sshcopy] [node]"
 		echo $(basename $0) "operate [on/off]"
+		echo $(basename $0) "exec [commands]"
 		echo $(basename $0) "[apply/check/reboot] [node]"
 		;;
 esac
