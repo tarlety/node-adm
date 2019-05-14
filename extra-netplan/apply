@@ -1,0 +1,32 @@
+#!/bin/bash
+
+# node-adm module v0.1.0
+# ARGUMENTS:
+#  $1 NODECTL	the command to control node.
+#  $2 NODE	which node to apply
+#  $3 NETPLAN	the customized netplan.
+VERSION=0.1.0
+
+HC='\033[0;93m'
+NC='\033[0m'
+
+# module:
+MODULENAME=hosts
+
+# arguments:
+NODECTL=${1:-ws ssh}
+NODE=${2:-ws}
+NETPLAN=${3:-}
+
+echo -e "${HC}=========================================================================${NC}"
+echo -e "${HC}NODE-ADM MODULE: ${MODULENAME} ${VERSION}${NC}"
+echo NODECTL: ${NODECTL}
+echo NODE: ${NODE}
+echo NETPLAN: ${NETPLAN}
+echo
+
+if [ -e "${NETPLAN}" ]
+then
+	cat ${NETPLAN} | ${NODECTL} ${NODE} "sudo -n tee /etc/netplan/01-netcfg.yaml"
+	${NODECTL} ${NODE} "sudo netplan generate; sudo netplan apply"
+fi

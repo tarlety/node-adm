@@ -48,6 +48,7 @@ DEFAULT_NODES="u1 u2 u3"
 DEFAULT_NODECTL="ssh -p \${SECURE_PORT}"
 DEFAULT_NODECTL_TTY="ssh -t"
 DEFAULT_HOSTFILE="/etc/hosts"
+DEFAULT_NETPLAN=""
 DEFAULT_SECURE_PORT="2201"
 DEFAULT_DNS1="8.8.8.8"
 DEFAULT_DNS2="8.8.4.4"
@@ -69,6 +70,7 @@ NODES=`cat ${CONFIG}/nodes 2>/dev/null`
 NODECTL=`cat ${CONFIG}/nodectl 2>/dev/null`
 NODECTL_TTY=`cat ${CONFIG}/nodectl_tty 2>/dev/null`
 HOSTFILE=`cat ${CONFIG}/hostfile 2>/dev/null`
+NETPLAN=`cat ${CONFIG}/netplan 2>/dev/null`
 SECURE_PORT=`cat ${CONFIG}/secure_port 2>/dev/null`
 DNS1=`cat ${CONFIG}/dns1 2>/dev/null`
 DNS2=`cat ${CONFIG}/dns2 2>/dev/null`
@@ -96,6 +98,7 @@ case $1 in
 		echo - NODECTL: ${NODECTL}
 		echo - NODECTL_TTY: ${NODECTL_TTY}
 		echo - HOSTFILE: ${HOSTFILE}
+		echo - NETPLAN: ${NETPLAN}
 		echo - SECURE_PORT: ${SECURE_PORT}
 		echo - DNS1: ${DNS1}
 		echo - DNS2: ${DNS2}
@@ -141,6 +144,11 @@ case $1 in
 				shift
 				HOSTFILE=${1:-${DEFAULT_HOSTFILE}}
 				echo ${HOSTFILE} > ${CONFIG}/hostfile
+				;;
+			"netplan")
+				shift
+				NETPLAN=${1:-${DEFAULT_NETPLAN}}
+				echo ${NETPLAN} > ${CONFIG}/netplan
 				;;
 			"secure_port")
 				shift
@@ -196,6 +204,8 @@ case $1 in
 				echo "			Ex: $(basename $0) config nodectl_tty '${DEFAULT_NODECTL_TTY}'"
 				echo " 	hostfile	which hosts file is used for all nodes."
 				echo "			Ex: $(basename $0) config hostfile '${DEFAULT_HOSTFILE}'"
+				echo " 	netplan		customized netplan."
+				echo "			Ex: $(basename $0) config netplan '${NETPLAN}'"
 				echo " 	secure_port	re-configuring the SSH secure port for all nodes."
 				echo "			Ex: $(basename $0) config secure_port '${DEFAULT_SECURE_PORT}'"
 				echo " 	dns1		which DNS is used."
@@ -363,6 +373,7 @@ case $1 in
 			./policy-update-notification/apply "${NODECTL}" "${NODE}"
 			./policy-disable-ipv6/apply "${NODECTL}" "${NODE}"
 			./policy-iptables/apply "${NODECTL}" "${NODE}" "${SECURE_PORT}"
+			./extra-netplan/apply "${NODECTL}" "${NODE}" "${NETPLAN}"
 		done
 		;;
 	"check")
