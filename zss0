@@ -370,7 +370,13 @@ case $1 in
 			;;
 		esac
 		;;
+	"exec-for-all")
+		shift
+		$0 exec "${NODES}" $*
+		;;
 	"exec")
+		shift
+		NODES=$1
 		shift
 		COMMANDS=$*
 		for NODE in ${NODES}
@@ -452,9 +458,10 @@ case $1 in
 		echo $(basename $0) config ...
 		echo $(basename $0) secret-create
 		echo $(basename $0) "state [list/save/load] [config/secret/data] [state_name, ex: date-stage-env]"
-		echo $(basename $0) "[sshclean/sshwait/sshcopy] [node]"
+		echo $(basename $0) "[sshclean/sshwait/sshcopy] [nodes]"
 		echo $(basename $0) "operate [on/off]"
-		echo $(basename $0) "exec [commands]"
+		echo $(basename $0) "exec-for-all [commands]"
+		echo $(basename $0) "exec [nodes] [commands]"
 		echo $(basename $0) "[apply/check/reboot] [node]"
 		;;
 esac
