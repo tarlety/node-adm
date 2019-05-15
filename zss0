@@ -452,6 +452,19 @@ case $1 in
 			${NODECTL} ${NODE} "sudo shutdown -r now"
 		done
 		;;
+	"policy")
+		shift
+		ACTION=$1 ; shift
+		POLICY=$1 ; shift
+		NODES=${1:-${NODES}} ; shift
+		COMMANDS=$*
+		for NODE in ${NODES}
+		do
+			echo =========================================================================
+			echo NODE:${NODE} ${ACTION}...
+			./${POLICY}/${ACTION} "${NODECTL}" "${NODE}" ${COMMANDS}
+		done
+		;;
 	*)
 		echo $(basename $0) version
 		echo $(basename $0) env
@@ -463,6 +476,7 @@ case $1 in
 		echo $(basename $0) "exec-for-all [commands]"
 		echo $(basename $0) "exec [nodes] [commands]"
 		echo $(basename $0) "[apply/check/reboot] [node]"
+		echo $(basename $0) "policy [install/apply/check] [policy] [node] [commands]"
 		;;
 esac
 
