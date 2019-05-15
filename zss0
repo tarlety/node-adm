@@ -403,7 +403,6 @@ case $1 in
 			./install-docker/install "${NODECTL}" "${NODE}" "${OPERATOR}"
 			./install-logwatch/install "${NODECTL}" "${NODE}" "${SMTP}"
 			./install-kernel/install "${NODECTL}" "${NODE}"
-			./install-post-packages/install "${NODECTL}" "${NODE}"
 			./policy-sshd/apply "${NODECTL}" "${NODE}" "${SECURE_PORT}"
 			./policy-ntp/apply "${NODECTL}" "${NODE}" "${NTP}"
 			./policy-root-no-login/apply "${NODECTL}" "${NODE}"
@@ -415,6 +414,8 @@ case $1 in
 			./policy-update-notification/apply "${NODECTL}" "${NODE}"
 			./policy-disable-ipv6/apply "${NODECTL}" "${NODE}"
 			./policy-iptables/apply "${NODECTL}" "${NODE}" "${SECURE_PORT}"
+			./install-post-packages/install "${NODECTL}" "${NODE}"
+			./install-docker-apps/install "${NODECTL}" "${NODE}"
 			./extra-netplan/apply "${NODECTL}" "${NODE}" "${NETPLAN}"
 		done
 		;;
