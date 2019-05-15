@@ -3,4 +3,4 @@
 # iptables -A INPUT -j LOG --log-prefix "[node-adm-input] " -m comment --comment 'node-adm'
 # iptables -A FORWARD -j LOG --log-prefix "[node-adm-forward] " -m comment --comment 'node-adm'
 
-sudo ufw logging medium
+sudo ufw logging low
