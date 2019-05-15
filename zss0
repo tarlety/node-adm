@@ -457,8 +457,8 @@ case $1 in
 		;;
 	"policy")
 		shift
-		ACTION=$1 ; shift
 		POLICY=$1 ; shift
+		ACTION=$1 ; shift
 		NODES=${1:-${NODES}} ; shift
 		COMMANDS=$*
 		for NODE in ${NODES}
@@ -479,7 +479,7 @@ case $1 in
 		echo $(basename $0) "exec-for-all [commands]"
 		echo $(basename $0) "exec [nodes] [commands]"
 		echo $(basename $0) "[apply/check/reboot] [node]"
-		echo $(basename $0) "policy [install/apply/check] [policy] [node] [commands]"
+		echo $(basename $0) "policy [policy] [install/apply/check] [node] [commands]"
 		;;
 esac
 
