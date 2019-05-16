@@ -22,6 +22,11 @@ echo NODECTL: ${NODECTL}
 echo NODE: ${NODE}
 echo
 
+echo -e "${HC}$ lshw -short${NC}"
+${NODECTL} ${NODE} "
+sudo lshw -short
+"
+
 echo -e "${HC}$ lscpu${NC}"
 ${NODECTL} ${NODE} "
 lscpu
