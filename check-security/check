@@ -50,9 +50,11 @@ then
 fi
 
 echo -e "${HC}Is there any sudoers?${NC}"
-${NODECTL} ${NODE} 'ls /etc/sudoers.d'
-[ "$(${NODECTL} ${NODE} 'ls /etc/sudoers.d')" == "README" ] \
-	|| echo -e "${HC}${MODULENAME} check FAIL${NC}"
+for SUDOER in $(${NODECTL} ${NODE} 'ls /etc/sudoers.d')
+do
+	[ "$SUDOER" == "README" ] \
+		|| echo -e "${HC}${MODULENAME} check FAIL${NC}: $SUDOER"
+done
 
 echo -e "${HC}Is log filesize abnormal?${NC}"
 ${NODECTL} ${NODE} "
