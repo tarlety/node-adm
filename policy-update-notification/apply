@@ -23,6 +23,7 @@ echo NODE: ${NODE}
 echo
 
 ${NODECTL} ${NODE} "
+sudo apt install unattended-upgrades -y ;
 sudo -n sed -i -e 's/^\/\/Unattended-Upgrade::Mail \"root\";$/Unattended-Upgrade::Mail \"root\";/' /etc/apt/apt.conf.d/50unattended-upgrades
 "
 

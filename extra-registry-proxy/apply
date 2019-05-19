@@ -28,6 +28,10 @@ echo
 if [ ! -z "${PROXY}" ]
 then
 	${NODECTL} ${NODE} "
+		sudo apt install moreutils jq -y ;
+	"
+
+	${NODECTL} ${NODE} "
 		sudo jq '. + {\"registry-mirrors\": [\"${PROXY}\"]}' /etc/docker/daemon.json | sudo sponge /etc/docker/daemon.json ;
 		sudo systemctl restart docker ;
 		"

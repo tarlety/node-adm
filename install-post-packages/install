@@ -24,6 +24,4 @@ echo
 
 ${NODECTL} ${NODE} "
 	sudo apt install net-tools -y ;
-	sudo apt install unattended-upgrades -y ;
-	sudo apt install moreutils jq -y ;
 "
