@@ -4,29 +4,28 @@
 # ARGUMENTS:
 #  $1 NODECTL	the command to control node.
 #  $2 NODE	which node to apply
-#  $3 NETPLAN	the customized netplan.
+#  $3 APTPROXY	the customized apt proxy configuration.
 VERSION=0.1.0
 
 HC='\033[0;93m'
 NC='\033[0m'
 
 # module:
-MODULENAME=netplan
+MODULENAME=aptproxy
 
 # arguments:
 NODECTL=${1:-ws ssh}
 NODE=${2:-ws}
-NETPLAN=${3:-}
+APTPROXY=${3:-}
 
 echo -e "${HC}=========================================================================${NC}"
 echo -e "${HC}NODE-ADM MODULE: ${MODULENAME} ${VERSION}${NC}"
 echo NODECTL: ${NODECTL}
 echo NODE: ${NODE}
-echo NETPLAN: ${NETPLAN}
+echo APTPROXY: ${APTPROXY}
 echo
 
-if [ -e "${NETPLAN}" ]
+if [ -e "${APTPROXY}" ]
 then
-	cat ${NETPLAN} | ${NODECTL} ${NODE} "sudo -n tee /etc/netplan/01-netcfg.yaml"
-	${NODECTL} ${NODE} "sudo netplan generate; sudo netplan apply"
+	cat ${APTPROXY} | ${NODECTL} ${NODE} "sudo -n tee /etc/apt/apt.conf.d/01proxy"
 fi

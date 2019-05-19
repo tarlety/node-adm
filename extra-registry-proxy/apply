@@ -4,14 +4,14 @@
 # ARGUMENTS:
 #  $1 NODECTL	the command to control node.
 #  $2 NODE	which node to apply
-#  $3 NETPLAN	the customized netplan.
+#  $3 PROXY	the registry proxy address and port.
 VERSION=0.1.0
 
 HC='\033[0;93m'
 NC='\033[0m'
 
 # module:
-MODULENAME=netplan
+MODULENAME=registry-proxy
 
 # arguments:
 NODECTL=${1:-ws ssh}
@@ -22,11 +22,10 @@ echo -e "${HC}==================================================================
 echo -e "${HC}NODE-ADM MODULE: ${MODULENAME} ${VERSION}${NC}"
 echo NODECTL: ${NODECTL}
 echo NODE: ${NODE}
-echo NETPLAN: ${NETPLAN}
+echo PROXY: ${PROXY}
 echo
 
-if [ -e "${NETPLAN}" ]
+if [ ! -z "${PROXY}" ]
 then
-	cat ${NETPLAN} | ${NODECTL} ${NODE} "sudo -n tee /etc/netplan/01-netcfg.yaml"
-	${NODECTL} ${NODE} "sudo netplan generate; sudo netplan apply"
+	${NODECTL} ${NODE} "sudo jq '. + {\"registry-mirrors\": [\"${PROXY}\"]}' /etc/docker/daemon.json"
 fi
