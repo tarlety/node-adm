@@ -16,7 +16,7 @@ MODULENAME=registry-proxy
 # arguments:
 NODECTL=${1:-ws ssh}
 NODE=${2:-ws}
-NETPLAN=${3:-}
+PROXY=${3:-}
 
 echo -e "${HC}=========================================================================${NC}"
 echo -e "${HC}NODE-ADM MODULE: ${MODULENAME} ${VERSION}${NC}"
@@ -27,5 +27,8 @@ echo
 
 if [ ! -z "${PROXY}" ]
 then
-	${NODECTL} ${NODE} "sudo jq '. + {\"registry-mirrors\": [\"${PROXY}\"]}' /etc/docker/daemon.json"
+	${NODECTL} ${NODE} "
+		sudo jq '. + {\"registry-mirrors\": [\"${PROXY}\"]}' /etc/docker/daemon.json | sudo sponge /etc/docker/daemon.json ;
+		sudo systemctl restart docker ;
+		"
 fi
