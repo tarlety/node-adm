@@ -418,27 +418,47 @@ case $1 in
 	"apply")
 		shift
 		NODES=${1:-${NODES}}
+		shift
 
 		GRUBUSER="$(gpg -d ${GRUBUSER_FILE})"
 		GRUBPASS="$(gpg -d ${GRUBPASS_FILE})"
 
-		shift
+		echo =========================================================================
+		echo preparing...
 		for NODE in ${NODES}
 		do
-			echo =========================================================================
-			echo NODE:${NODE} applying updates...
 			./policy-hosts/apply "${NODECTL}" "${OPERATOR}@${NODE}" "${HOSTFILE}"
 			./extra-aptproxy/apply "${NODECTL}" "${OPERATOR}@${NODE}" "${APTPROXY}"
+		done
+
+		echo =========================================================================
+		echo applying updates...
+		for NODE in ${NODES}
+		do
 			./install-update/install "${NODECTL}" "${OPERATOR}@${NODE}" &
 		done
 		wait
 
+		echo =========================================================================
+		echo applying docker...
 		for NODE in ${NODES}
 		do
-			echo =========================================================================
-			echo NODE:${NODE} applying installs...
-			./install-docker/install "${NODECTL}" "${OPERATOR}@${NODE}" "${OPERATOR}"
-			./install-logwatch/install "${NODECTL}" "${OPERATOR}@${NODE}" "${SMTP}"
+			./install-docker/install "${NODECTL}" "${OPERATOR}@${NODE}" "${OPERATOR}" &
+		done
+		wait
+
+		echo =========================================================================
+		echo applying logwatch...
+		for NODE in ${NODES}
+		do
+			./install-logwatch/install "${NODECTL}" "${OPERATOR}@${NODE}" "${SMTP}" &
+		done
+		wait
+
+		echo =========================================================================
+		echo applying other installations...
+		for NODE in ${NODES}
+		do
 			./install-kernel/install "${NODECTL}" "${OPERATOR}@${NODE}"
 			./policy-sshd/apply "${NODECTL}" "${OPERATOR}@${NODE}" "${SECURE_PORT}"
 			./policy-ntp/apply "${NODECTL}" "${OPERATOR}@${NODE}" "${NTP}"
