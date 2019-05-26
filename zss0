@@ -34,7 +34,7 @@
 #------------------------------------------------------------------------------
 # Environments:
 
-VERSION=0.4.2
+VERSION=0.4.3
 SCRIPTNAME=node-adm
 APPNAME=node-adm
 SECRET=${SECRET:-"${PWD}/.secret/${SCRIPTNAME}"}
@@ -370,7 +370,7 @@ case $1 in
 
 		for NODE in ${NODES}
 		do
-			ssh-copy-id -i ~/.ssh/id_rsa.pub "${NODE}"
+			ssh-copy-id -i ~/.ssh/id_rsa.pub "${OPERATOR}@${NODE}"
 		done
 		;;
 	"operate")
@@ -379,14 +379,14 @@ case $1 in
 		"on")
 			for NODE in ${NODES}
 			do
-				${NODECTL_TTY} ${NODE} \
+				${NODECTL_TTY} ${OPERATOR}@${NODE} \
 					"echo ${OPERATOR} ALL=\(ALL\) NOPASSWD: ALL | sudo tee /etc/sudoers.d/${OPERATOR}"
 			done
 			;;
 		"off")
 			for NODE in ${NODES}
 			do
-				${NODECTL_TTY} ${NODE} \
+				${NODECTL_TTY} ${OPERATOR}@${NODE} \
 					"sudo -n rm /etc/sudoers.d/${OPERATOR}"
 			done
 			;;
@@ -403,7 +403,7 @@ case $1 in
 		COMMANDS=$*
 		for NODE in ${NODES}
 		do
-			eval ${NODECTL} ${NODE} \"${COMMANDS}\"
+			eval ${NODECTL} ${OPERATOR}@${NODE} \"${COMMANDS}\"
 		done
 		;;
 	"apply")
@@ -418,27 +418,27 @@ case $1 in
 		do
 			echo =========================================================================
 			echo NODE:${NODE} applying...
-			./policy-hosts/apply "${NODECTL}" "${NODE}" "${HOSTFILE}"
-			./extra-aptproxy/apply "${NODECTL}" "${NODE}" "${APTPROXY}"
-			./install-update/install "${NODECTL}" "${NODE}"
-			./install-docker/install "${NODECTL}" "${NODE}" "${OPERATOR}"
-			./install-logwatch/install "${NODECTL}" "${NODE}" "${SMTP}"
-			./install-kernel/install "${NODECTL}" "${NODE}"
-			./policy-sshd/apply "${NODECTL}" "${NODE}" "${SECURE_PORT}"
-			./policy-ntp/apply "${NODECTL}" "${NODE}" "${NTP}"
-			./policy-root-no-login/apply "${NODECTL}" "${NODE}"
-			./policy-root-mail-alias/apply "${NODECTL}" "${NODE}" "${OPERATOR}" "${MAILTO}"
-			./policy-lock-cronjobs/apply "${NODECTL}" "${NODE}"
-			./policy-grub-security/apply "${NODECTL}" "${NODE}" "${GRUBUSER}" "${GRUBPASS}"
-			./policy-logrorate/apply "${NODECTL}" "${NODE}"
-			./policy-docker-log-rotate/apply "${NODECTL}" "${NODE}"
-			./policy-update-notification/apply "${NODECTL}" "${NODE}"
-			./policy-disable-ipv6/apply "${NODECTL}" "${NODE}"
-			./policy-iptables/apply "${NODECTL}" "${NODE}" "${SECURE_PORT}"
-			./install-post-packages/install "${NODECTL}" "${NODE}"
-			./install-docker-apps/install "${NODECTL}" "${NODE}"
-			./extra-netplan/apply "${NODECTL}" "${NODE}" "${NETPLAN}"
-			./extra-registry-proxy/apply "${NODECTL}" "${NODE}" "${REGISTRYPROXYURL}"
+			./policy-hosts/apply "${NODECTL}" "${OPERATOR}@${NODE}" "${HOSTFILE}"
+			./extra-aptproxy/apply "${NODECTL}" "${OPERATOR}@${NODE}" "${APTPROXY}"
+			./install-update/install "${NODECTL}" "${OPERATOR}@${NODE}"
+			./install-docker/install "${NODECTL}" "${OPERATOR}@${NODE}" "${OPERATOR}"
+			./install-logwatch/install "${NODECTL}" "${OPERATOR}@${NODE}" "${SMTP}"
+			./install-kernel/install "${NODECTL}" "${OPERATOR}@${NODE}"
+			./policy-sshd/apply "${NODECTL}" "${OPERATOR}@${NODE}" "${SECURE_PORT}"
+			./policy-ntp/apply "${NODECTL}" "${OPERATOR}@${NODE}" "${NTP}"
+			./policy-root-no-login/apply "${NODECTL}" "${OPERATOR}@${NODE}"
+			./policy-root-mail-alias/apply "${NODECTL}" "${NODE}" "${OPERATOR}@${OPERATOR}" "${MAILTO}"
+			./policy-lock-cronjobs/apply "${NODECTL}" "${OPERATOR}@${NODE}"
+			./policy-grub-security/apply "${NODECTL}" "${OPERATOR}@${NODE}" "${GRUBUSER}" "${GRUBPASS}"
+			./policy-logrorate/apply "${NODECTL}" "${OPERATOR}@${NODE}"
+			./policy-docker-log-rotate/apply "${NODECTL}" "${OPERATOR}@${NODE}"
+			./policy-update-notification/apply "${NODECTL}" "${OPERATOR}@${NODE}"
+			./policy-disable-ipv6/apply "${NODECTL}" "${OPERATOR}@${NODE}"
+			./policy-iptables/apply "${NODECTL}" "${OPERATOR}@${NODE}" "${SECURE_PORT}"
+			./install-post-packages/install "${NODECTL}" "${OPERATOR}@${NODE}"
+			./install-docker-apps/install "${NODECTL}" "${OPERATOR}@${NODE}"
+			./extra-netplan/apply "${NODECTL}" "${OPERATOR}@${NODE}" "${NETPLAN}"
+			./extra-registry-proxy/apply "${NODECTL}" "${OPERATOR}@${NODE}" "${REGISTRYPROXYURL}"
 		done
 		;;
 	"check")
@@ -449,21 +449,21 @@ case $1 in
 		do
 			echo =========================================================================
 			echo NODE:${NODE} checking...
-			./policy-hosts/check "${NODECTL}" "${NODE}" "${HOSTFILE}"
-			./policy-sshd/check "${NODECTL}" "${NODE}" "${SECURE_PORT}"
-			./policy-ntp/check "${NODECTL}" "${NODE}" "${NTP}"
-			./policy-root-no-login/check "${NODECTL}" "${NODE}"
-			./policy-root-mail-alias/check "${NODECTL}" "${NODE}" "${OPERATOR}" "${MAILTO}"
-			./policy-lock-cronjobs/check "${NODECTL}" "${NODE}"
-			./policy-grub-security/check "${NODECTL}" "${NODE}"
-			./policy-logrorate/check "${NODECTL}" "${NODE}"
-			./policy-docker-log-rotate/check "${NODECTL}" "${NODE}"
-			./policy-update-notification/check "${NODECTL}" "${NODE}"
-			./policy-disable-ipv6/check "${NODECTL}" "${NODE}"
-			./policy-iptables/check "${NODECTL}" "${NODE}"
-			./check-security/check "${NODECTL}" "${NODE}"
-			./check-port-inspect/check "${NODECTL}" "${NODE}"
-			./check-hardware/check "${NODECTL}" "${NODE}"
+			./policy-hosts/check "${NODECTL}" "${OPERATOR}@${NODE}" "${HOSTFILE}"
+			./policy-sshd/check "${NODECTL}" "${OPERATOR}@${NODE}" "${SECURE_PORT}"
+			./policy-ntp/check "${NODECTL}" "${OPERATOR}@${NODE}" "${NTP}"
+			./policy-root-no-login/check "${NODECTL}" "${OPERATOR}@${NODE}"
+			./policy-root-mail-alias/check "${NODECTL}" "${OPERATOR}@${NODE}" "${OPERATOR}" "${MAILTO}"
+			./policy-lock-cronjobs/check "${NODECTL}" "${OPERATOR}@${NODE}"
+			./policy-grub-security/check "${NODECTL}" "${OPERATOR}@${NODE}"
+			./policy-logrorate/check "${NODECTL}" "${OPERATOR}@${NODE}"
+			./policy-docker-log-rotate/check "${NODECTL}" "${OPERATOR}@${NODE}"
+			./policy-update-notification/check "${NODECTL}" "${OPERATOR}@${NODE}"
+			./policy-disable-ipv6/check "${NODECTL}" "${OPERATOR}@${NODE}"
+			./policy-iptables/check "${NODECTL}" "${OPERATOR}@${NODE}"
+			./check-security/check "${NODECTL}" "${OPERATOR}@${NODE}"
+			./check-port-inspect/check "${NODECTL}" "${OPERATOR}@${NODE}"
+			./check-hardware/check "${NODECTL}" "${OPERATOR}@${NODE}"
 		done
 		;;
 	"reboot")
@@ -474,7 +474,7 @@ case $1 in
 		do
 			echo =========================================================================
 			echo NODE:${NODE} rebooting...
-			${NODECTL} ${NODE} "sudo shutdown -r now"
+			${NODECTL} ${OPERATOR}@${NODE} "sudo shutdown -r now"
 		done
 		;;
 	"policy")
@@ -487,7 +487,7 @@ case $1 in
 		do
 			echo =========================================================================
 			echo NODE:${NODE} ${ACTION}...
-			./${POLICY}/${ACTION} "${NODECTL}" "${NODE}" ${COMMANDS}
+			./${POLICY}/${ACTION} "${NODECTL}" "${OPERATOR}@${NODE}" ${COMMANDS}
 		done
 		;;
 	*)
