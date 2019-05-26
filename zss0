@@ -426,17 +426,24 @@ case $1 in
 		for NODE in ${NODES}
 		do
 			echo =========================================================================
-			echo NODE:${NODE} applying...
+			echo NODE:${NODE} applying updates...
 			./policy-hosts/apply "${NODECTL}" "${OPERATOR}@${NODE}" "${HOSTFILE}"
 			./extra-aptproxy/apply "${NODECTL}" "${OPERATOR}@${NODE}" "${APTPROXY}"
-			./install-update/install "${NODECTL}" "${OPERATOR}@${NODE}"
+			./install-update/install "${NODECTL}" "${OPERATOR}@${NODE}" &
+		done
+		wait
+
+		for NODE in ${NODES}
+		do
+			echo =========================================================================
+			echo NODE:${NODE} applying installs...
 			./install-docker/install "${NODECTL}" "${OPERATOR}@${NODE}" "${OPERATOR}"
 			./install-logwatch/install "${NODECTL}" "${OPERATOR}@${NODE}" "${SMTP}"
 			./install-kernel/install "${NODECTL}" "${OPERATOR}@${NODE}"
 			./policy-sshd/apply "${NODECTL}" "${OPERATOR}@${NODE}" "${SECURE_PORT}"
 			./policy-ntp/apply "${NODECTL}" "${OPERATOR}@${NODE}" "${NTP}"
 			./policy-root-no-login/apply "${NODECTL}" "${OPERATOR}@${NODE}"
-			./policy-root-mail-alias/apply "${NODECTL}" "${NODE}" "${OPERATOR}@${OPERATOR}" "${MAILTO}"
+			./policy-root-mail-alias/apply "${NODECTL}" "${OPERATOR}@${NODE}" "${OPERATOR}" "${MAILTO}"
 			./policy-lock-cronjobs/apply "${NODECTL}" "${OPERATOR}@${NODE}"
 			./policy-grub-security/apply "${NODECTL}" "${OPERATOR}@${NODE}" "${GRUBUSER}" "${GRUBPASS}"
 			./policy-logrorate/apply "${NODECTL}" "${OPERATOR}@${NODE}"
