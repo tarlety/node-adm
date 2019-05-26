@@ -45,8 +45,8 @@ DEFAULT_BASE_CONFIG=nop
 DEFAULT_BASE_SECRET=nop
 DEFAULT_BASE_DATA=nop
 DEFAULT_NODES="u1 u2 u3"
-DEFAULT_NODECTL="ssh -p 22"
-DEFAULT_NODECTL_TTY="ssh -t"
+DEFAULT_NODECTL='ssh'
+DEFAULT_NODECTL_TTY='ssh -t'
 DEFAULT_HOSTFILE="/etc/hosts"
 DEFAULT_NETPLAN="" # 01-netplan
 DEFAULT_APTPROXY="" # 01proxy
@@ -373,6 +373,15 @@ case $1 in
 			ssh-copy-id -i ~/.ssh/id_rsa.pub "${OPERATOR}@${NODE}"
 		done
 		;;
+	"sshcopy-force")
+		shift
+		NODES=${1:-${NODES}}
+
+		for NODE in ${NODES}
+		do
+			ssh-copy-id -o "StrictHostKeyChecking no" -i ~/.ssh/id_rsa.pub "${OPERATOR}@${NODE}"
+		done
+		;;
 	"operate")
 		shift
 		case $1 in
@@ -496,7 +505,7 @@ case $1 in
 		echo $(basename $0) config ...
 		echo $(basename $0) secret-create
 		echo $(basename $0) "state [list/save/load] [config/secret/data] [state_name, ex: date-stage-env]"
-		echo $(basename $0) "[sshclean/sshwait/sshcopy] [nodes]"
+		echo $(basename $0) "[sshclean/sshwait/sshcopy/sshcopy-force] [nodes]"
 		echo $(basename $0) "operate [on/off]"
 		echo $(basename $0) "exec-for-all [commands]"
 		echo $(basename $0) "exec [nodes] [commands]"
