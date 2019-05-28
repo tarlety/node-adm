@@ -1,18 +1,19 @@
 #!/bin/bash
 
-#------------------------------------------------------------------------------
+# 0.6.0 backlogs
+#   - derived: node-adm, ceph-adm, kube-adm, zerus-test
+
+#==============================================================================
 # Copyright (c) 2019, tarlety@gmail.com
 #
-# Zerus Scripting Standard v0.4.0
+# Zerus Scripting Standard v0.5.5
 #
 # This standard defines script state management framework.
 # Following this framework, you can manage app states in a consistent way.
 #
 # Environments:
 #
-#    SECRET	Where to keep secrets.
-#    CONFIG	Where to keep configurations.
-#    STORE	Where to keep persistent data.
+#    ZSS_STORE	The store location to keep config/secret/state/data.
 #
 # Commands:
 #
@@ -24,99 +25,115 @@
 #                       The state can be saved or loaded.
 #                       Default state type is all states and default action is "list".
 #
+# Store Structure:
+#
+#   - store/projectname/appname/config
+#   - store/projectname/appname/secret
+#     - *.env
+#   - store/projectname/appname/data
+#     - (container volume)
+#   - store/projectname/appname/state
+#     - *-config.tgz
+#     - *-secret.tgz.enc
+#     - *-data.tgz.enc
+#   - store/projectname/appname/others...
+#
+# ZSS framework and AppImplementing interface (zss0.impl)
+#
+#    - app
+#    - config
+#    - vars
+#    - requirment
+#    - secret-create
+#    - state-data-save
+#    - state-secret-load-post
+#    - state-data-load
+#    - command
+#    - usage
+#
 # Scnario:
 #
-#    1. First, use "<scirptname> env" to confirm the state is clean.
-#    2. Then, use "<scriptname> config" to know how many configurations you have to set.
-#    3. Then, use "<scriptname> secret-create" to create secret files.
-#    4. Then, use "<scriptname> env" again to confirm the state is what you want.
+#    1. First, use "<app> env" to check current configurations.
+#    2. Then, use "<app> config" to set proper configurations based on runtime environments.
+#    3. Then, use "<app> secret-create" to create secret based on authentications.
+#    4. Then, use "<app> state" to save config and secret.
+#
+# Changelog:
+#
+#    v0.5.3:
+#       - introducing zss0.impl
+#
+#    v0.5.0:
+#       - new designed Store Structure
+#       - framework integrated: app-related sections are bounded by AppImplementing
+#       - certificate as secret files shall be encrypted
 
-#------------------------------------------------------------------------------
+#==============================================================================
 # Environments:
 
-VERSION=0.4.3
-SCRIPTNAME=node-adm
-APPNAME=node-adm
-SECRET=${SECRET:-"${PWD}/.secret/${SCRIPTNAME}"}
-CONFIG=${CONFIG:-"${PWD}/.config/${SCRIPTNAME}"}
+ZSSVERSION=0.5.5
+# AppImplementing Section: app
+#------------------------------------------------------------------------------
+source ./zss0.impl app
+#------------------------------------------------------------------------------
+STORE=${ZSS_STORE:-"${HOME}/store"}/${PROJECTNAME}/${APPNAME}
+SECRET=${SECRET:-"${STORE}/secret"}
+CONFIG=${CONFIG:-"${STORE}/config"}
+DATA=${DATA:-"${STORE}/data"}
+STATE=${STATE:-"${STORE}/state"}
 
-DEFAULT_STORE=${STORE:-"${PWD}/.store/${SCRIPTNAME}"}
-DEFAULT_BASE_CONFIG=nop
-DEFAULT_BASE_SECRET=nop
-DEFAULT_BASE_DATA=nop
-DEFAULT_NODES="u1 u2 u3"
-DEFAULT_NODECTL='ssh'
-DEFAULT_NODECTL_TTY='ssh -t'
-DEFAULT_HOSTFILE="/etc/hosts"
-DEFAULT_NETPLAN="" # 01-netplan
-DEFAULT_APTPROXY="" # 01proxy
-DEFAULT_REGISTRYPROXYURL="http://10.0.2.2:5000"
-DEFAULT_SECURE_PORT="2201"
-DEFAULT_DNS1="8.8.8.8"
-DEFAULT_DNS2="8.8.4.4"
-DEFAULT_NTP="91.189.89.199"
-DEFAULT_SMTP="localhost"
-DEFAULT_OPERATOR="$(whoami)"
-DEFAULT_MAILTO="$(whoami)@localhost"
-DEFAULT_GPGKEYNAME="$(whoami)"
-
-GRUBUSER_FILE=${SECRET}/grubuser
-GRUBPASS_FILE=${SECRET}/grubpass
-SALT=${SECRET}/salt
-
-STORE=`cat ${CONFIG}/store 2>/dev/null`
 BASE_CONFIG=`cat ${CONFIG}/base_config 2>/dev/null`
 BASE_SECRET=`cat ${CONFIG}/base_secret 2>/dev/null`
 BASE_DATA=`cat ${CONFIG}/base_data 2>/dev/null`
-NODES=`cat ${CONFIG}/nodes 2>/dev/null`
-NODECTL=`cat ${CONFIG}/nodectl 2>/dev/null`
-NODECTL_TTY=`cat ${CONFIG}/nodectl_tty 2>/dev/null`
-HOSTFILE=`cat ${CONFIG}/hostfile 2>/dev/null`
-NETPLAN=`cat ${CONFIG}/netplan 2>/dev/null`
-APTPROXY=`cat ${CONFIG}/aptproxy 2>/dev/null`
-REGISTRYPROXYURL=`cat ${CONFIG}/registryproxyurl 2>/dev/null`
-SECURE_PORT=`cat ${CONFIG}/secure_port 2>/dev/null`
-DNS1=`cat ${CONFIG}/dns1 2>/dev/null`
-DNS2=`cat ${CONFIG}/dns2 2>/dev/null`
-NTP=`cat ${CONFIG}/ntp 2>/dev/null`
-SMTP=`cat ${CONFIG}/smtp 2>/dev/null`
-OPERATOR=`cat ${CONFIG}/operator 2>/dev/null`
-MAILTO=`cat ${CONFIG}/mailto 2>/dev/null`
-GPGKEYNAME=`cat ${CONFIG}/gpgkeyname 2>/dev/null`
+SALT=${SECRET}/salt
 
+DEFAULT_GPGKEY=${USERNAME}
+
+# AppImplementing Section: configs
 #------------------------------------------------------------------------------
+source ./zss0.impl config
+#------------------------------------------------------------------------------
+
+for KEY in ${CONFIGKEYS}
+do
+	VARNAME=$(echo ${KEY} | tr '[:lower:]' '[:upper:]')
+	eval ${VARNAME}='$(cat ${CONFIG}/$KEY 2>/dev/null)'
+done
+
+GPGKEY=`cat ${CONFIG}/gpgkey 2>/dev/null`
+
+eval export $(echo ${CONFIGKEYS} | tr '[:lower:]' '[:upper:]')
+
+# AppImplementing Section: vars
+#------------------------------------------------------------------------------
+source ./zss0.impl vars
+#------------------------------------------------------------------------------
+
+#==============================================================================
 # Commands
 
 case $1 in
 	"version")
-		echo ${VERSION}
+		echo ${ZSSVERSION} ${APPVERSION}
 		;;
 	"env")
 		echo =========================================================================
-		echo "## SCRIPT NAME: ${SCRIPTNAME}"
-		echo - VERSION: ${VERSION}
+		echo "## NAME: ${PROJECTNAME}/${APPNAME}"
+		echo - ZSSVERSION: ${ZSSVERSION}
+		echo - APPVERSION: ${APPVERSION}
 		echo - STORE: ${STORE}
-		echo - SECRET: $SECRET $(echo $(cat $SALT 2>/dev/null) $(cat ${SECRET}/* | sha256sum 2>/dev/null) | sha1sum | cut -c1-8)
-		echo - CONFIG: ${CONFIG}
-		echo - NODES: ${NODES}
-		echo - NODECTL: ${NODECTL}
-		echo - NODECTL_TTY: ${NODECTL_TTY}
-		echo - HOSTFILE: ${HOSTFILE}
-		echo - NETPLAN: ${NETPLAN}
-		echo - APTPROXY: ${APTPROXY}
-		echo - REGISTRYPROXYURL: ${REGISTRYPROXYURL}
-		echo - SECURE_PORT: ${SECURE_PORT}
-		echo - DNS1: ${DNS1}
-		echo - DNS2: ${DNS2}
-		echo - NTP: ${NTP}
-		echo - SMTP: ${SMTP}
-		echo - OPERATOR: ${OPERATOR}
-		echo - MAILTO: ${MAILTO}
-		echo - GPGKEYNAME: ${GPGKEYNAME} $(gpg -k ${GPGKEYNAME} 2>/dev/null | sed -n '2p' | xargs)
-		echo - SALT: $(cat ${SALT} ${SALT} 2>/dev/null | sha1sum | cut -c1-8)
+		echo - SECRET: $(echo $(cat $SALT 2>/dev/null) $(cat ${SECRET}/* | sha256sum 2>/dev/null) | sha1sum | cut -c1-8)
+		for KEY in ${CONFIGKEYS}
+		do
+			KEY=$(echo ${KEY} | tr '[:lower:]' '[:upper:]')
+			eval echo - ${KEY}: \${${KEY}}
+		done
+		echo - GPGKEY: ${GPGKEY} $(gpg -k ${GPGKEY} 2>/dev/null | sed -n '2p' | xargs)
 		echo "## REQUIREMENT:"
-		echo - grub-mkpasswd-pbkdf2: $(which grub-mkpasswd-pbkdf2)
-		echo - ssh: $(which ssh)
+		# AppImplementing Section: requirement
+		#------------------------------------------------------------------------------
+		source ./zss0.impl requirement
+		#------------------------------------------------------------------------------
 		echo - gpg: $(which gpg)
 		echo - tar: $(which tar)
 		echo - colordiff: $(which colordiff)
@@ -126,122 +143,32 @@ case $1 in
 		shift
 		mkdir -p ${CONFIG}
 		case $1 in
-			"store")
+			"gpgkey")
 				shift
-				STORE=${1:-${DEFAULT_STORE}}
-				echo ${STORE} > ${CONFIG}/store
+				GPGKEY=${1:-${DEFAULT_GPGKEY}}
+				echo ${GPGKEY} >  ${CONFIG}/gpgkey
 				;;
-			"nodes")
-				shift
-				NODES=${1:-${DEFAULT_NODES}}
-				echo ${NODES} > ${CONFIG}/nodes
-				;;
-			"nodectl")
-				shift
-				NODECTL=${1:-${DEFAULT_NODECTL}}
-				echo ${NODECTL} > ${CONFIG}/nodectl
-				;;
-			"nodectl_tty")
-				shift
-				NODECTL_TTY=${1:-${DEFAULT_NODECTL_TTY}}
-				echo ${NODECTL_TTY} > ${CONFIG}/nodectl_tty
-				;;
-			"hostfile")
-				shift
-				HOSTFILE=${1:-${DEFAULT_HOSTFILE}}
-				echo ${HOSTFILE} > ${CONFIG}/hostfile
-				;;
-			"netplan")
-				shift
-				NETPLAN=${1:-${DEFAULT_NETPLAN}}
-				echo ${NETPLAN} > ${CONFIG}/netplan
-				;;
-			"aptproxy")
-				shift
-				APTPROXY=${1:-${DEFAULT_APTPROXY}}
-				echo ${APTPROXY} > ${CONFIG}/aptproxy
-				;;
-			"registryproxyurl")
-				shift
-				REGISTRYPROXYURL=${1:-${DEFAULT_REGISTRYPROXYURL}}
-				echo ${REGISTRYPROXYURL} > ${CONFIG}/registryproxyurl
-				;;
-			"secure_port")
-				shift
-				SECURE_PORT=${1:-${DEFAULT_SECURE_PORT}}
-				echo ${SECURE_PORT} > ${CONFIG}/secure_port
-				;;
-			"dns1")
-				shift
-				DNS1=${1:-${DEFAULT_DNS1}}
-				echo ${DNS1} > ${CONFIG}/dns1
-				;;
-			"dns2")
-				shift
-				DNS2=${1:-${DEFAULT_DNS2}}
-				echo ${DNS2} > ${CONFIG}/dns2
-				;;
-			"ntp")
-				shift
-				NTP=${1:-${DEFAULT_NTP}}
-				echo ${NTP} > ${CONFIG}/ntp
-				;;
-			"smtp")
-				shift
-				SMTP=${1:-${DEFAULT_SMTP}}
-				echo ${SMTP} > ${CONFIG}/smtp
-				;;
-			"operator")
-				shift
-				OPERATOR=${1:-${DEFAULT_OPERATOR}}
-				echo ${OPERATOR} > ${CONFIG}/operator
-				;;
-			"mailto")
-				shift
-				MAILTO=${1:-${DEFAULT_MAILTO}}
-				echo ${MAILTO} > ${CONFIG}/mailto
-				;;
-			"gpg")
-				shift
-				GPGKEYNAME=${1:-${DEFAULT_GPGKEYNAME}}
-				echo ${GPGKEYNAME} >  ${CONFIG}/gpgkeyname
+			""|"help")
+				echo "Usage: $(basename $0) config <key> <value>"
+				echo ""
+				echo "Config keys:"
+				echo ""
+				for KEY in ${CONFIGKEYS}
+				do
+					VALUE_VAR=$(echo DEFAULT_${KEY} | tr '[:lower:]' '[:upper:]')
+					VALUE=${2:-$(eval echo \${${VALUE_VAR}})}
+					DESCRIPTION=${CONFIG_DESCRIPTIONS[${KEY}]}
+					echo " ${KEY}: ${DESCRIPTION}"
+					echo "	Ex: $(basename $0) config ${KEY} ${VALUE}"
+				done
+				echo " gpgkey: configure which gpg key to use."
+				echo "	Ex: $(basename $0) config gpgkey ${DEFAULT_GPGKEY}"
 				;;
 			*)
-				echo $(basename $0) config "<config_name>" "<config_value>"
-				echo ""
-				echo "config names:"
-				echo "	store		The local repository for state."
-				echo "			Ex: $(basename $0) config store '${DEFAULT_STORE}'"
-				echo "	nodes		which nodes to apply."
-				echo "			Ex: $(basename $0) config nodes '${DEFAULT_NODES}'"
-				echo "	nodectl		the command to control the node."
-				echo "			Ex: $(basename $0) config nodectl '${DEFAULT_NODECTL}'"
-				echo " 	nodectl_tty	the command to control the node with tty allocatation."
-				echo "			Ex: $(basename $0) config nodectl_tty '${DEFAULT_NODECTL_TTY}'"
-				echo " 	hostfile	which hosts file is used for all nodes."
-				echo "			Ex: $(basename $0) config hostfile '${DEFAULT_HOSTFILE}'"
-				echo " 	netplan		customized netplan."
-				echo "			Ex: $(basename $0) config netplan '${NETPLAN}'"
-				echo " 	aptproxy	customized apt proxy configuration."
-				echo "			Ex: $(basename $0) config aptproxy '${APTPROXY}'"
-				echo " 	registryproxyurl the registry proxy proto, address and port."
-				echo "			Ex: $(basename $0) config registryproxyurl '${REGISTRYPROXYURL}'"
-				echo " 	secure_port	re-configuring the SSH secure port for all nodes."
-				echo "			Ex: $(basename $0) config secure_port '${DEFAULT_SECURE_PORT}'"
-				echo " 	dns1		which DNS is used."
-				echo "			Ex: $(basename $0) config dns1 '${DEFAULT_DNS1}'"
-				echo " 	dns2		which DNS is used."
-				echo "			Ex: $(basename $0) config dns2 '${DEFAULT_DNS2}'"
-				echo " 	ntp		which NTP is used."
-				echo "			Ex: $(basename $0) config ntp '${DEFAULT_NTP}'"
-				echo " 	smtp		which SMTP is used."
-				echo "			Ex: $(basename $0) config smtp '${DEFAULT_SMTP}'"
-				echo " 	operator	the operator account of all nodes."
-				echo "			Ex: $(basename $0) config operator '${DEFAULT_OPERATOR}'"
-				echo " 	mailto		the mail address to recieve notifications."
-				echo "			Ex: $(basename $0) config mailto '${DEFAULT_MAILTO}'"
-				echo "	gpg		configure which gpg key to use."
-				echo "			Ex: $(basename $0) config gpg '${DEFAULT_GPGKEYNAME}'"
+				KEY=$1
+				VALUE_VAR=$(echo DEFAULT_${KEY} | tr '[:lower:]' '[:upper:]')
+				VALUE=${2:-$(eval echo \${${VALUE_VAR}})}
+				eval echo \'${VALUE}\' > ${CONFIG}/${KEY}
 				;;
 		esac
 		;;
@@ -250,12 +177,10 @@ case $1 in
 		mkdir -p ${SECRET}
 		chmod -R go-rwx ${SECRET}
 
-		read -p "GRUBUSER:" GRUBUSER
-		echo "$GRUBUSER" | gpg -ear ${GPGKEYNAME} -o ${GRUBUSER_FILE}
-
-		grub-mkpasswd-pbkdf2
-		read -p "GRUBPASS (copy from grub.pbkdf2.sha512...to the end, and paste here):" GRUBPASS
-		echo "$GRUBPASS" | gpg -ear ${GPGKEYNAME} -o ${GRUBPASS_FILE}
+		# AppImplementing Section: secret-create
+		#------------------------------------------------------------------------------
+		source ./zss0.impl secret-create
+		#------------------------------------------------------------------------------
 
 		gpg --gen-random --armor 2 16 | base64 | cut -c1-16 > ${SALT}
 		;;
@@ -279,17 +204,21 @@ case $1 in
 					echo ${STATENAME} > ${CONFIG}/base_secret
 					mv -f ${STORE}/state/${STATENAME}-${APPNAME}-secret.tgz.enc ${STORE}/state/${STATENAME}-bak-${APPNAME}-secret.tgz.enc &>/dev/null
 					cd ${SECRET}
-					tar -zc . | gpg -ear ${GPGKEYNAME} -o ${STORE}/state/${STATENAME}-${APPNAME}-secret.tgz.enc
+					tar -zc . | \
+						gpg -ear ${GPGKEY} -o ${STORE}/state/${STATENAME}-${APPNAME}-secret.tgz.enc
 					cd - &> /dev/null
 				fi
 				if [ "${TYPE}" == "data" -o "${TYPE}" == "" ]; then
-					echo "DATA state not support."
+					echo ${STATENAME} > ${CONFIG}/base_data
+					# AppImplementing Section: data save
+					#------------------------------------------------------------------------------
+					source ./zss0.impl state-data-save
+					#------------------------------------------------------------------------------
 				fi
 				;;
 			"load")
 				if [ "${TYPE}" == "config" -o "${TYPE}" == "" ]; then
-					if [ -e ${STORE}/state/${STATENAME}-${APPNAME}-config.tgz ]
-					then
+					if [ -e ${STORE}/state/${STATENAME}-${APPNAME}-config.tgz ]; then
 						cd ${CONFIG}
 						tar -zxf ${STORE}/state/${STATENAME}-${APPNAME}-config.tgz
 						cd - &> /dev/null
@@ -297,16 +226,23 @@ case $1 in
 					echo ${STATENAME} > ${CONFIG}/base_config
 				fi
 				if [ "${TYPE}" == "secret" -o "${TYPE}" == "" ]; then
-					if [ -e ${STORE}/state/${STATENAME}-${APPNAME}-secret.tgz.enc ]
-					then
+					if [ -e ${STORE}/state/${STATENAME}-${APPNAME}-secret.tgz.enc ]; then
 						cd ${SECRET}
 						gpg -d ${STORE}/state/${STATENAME}-${APPNAME}-secret.tgz.enc | tar xz
 						cd - &> /dev/null
+						# AppImplementing Section: secret load post
+						#------------------------------------------------------------------------------
+						source $(dirname $0)/zss0.impl state-secret-load-post
+						#------------------------------------------------------------------------------
 					fi
 					echo ${STATENAME} > ${CONFIG}/base_secret
 				fi
 				if [ "${TYPE}" == "data" -o "${TYPE}" == "" ]; then
-					echo "DATA state not support."
+					# AppImplementing Section: data load
+					#------------------------------------------------------------------------------
+					source ./zss0.impl state-data-load
+					#------------------------------------------------------------------------------
+					echo ${STATENAME} > ${CONFIG}/base_data
 				fi
 				;;
 			"list"|*)
@@ -314,19 +250,19 @@ case $1 in
 				NC='\033[0m'
 				if [ "${TYPE}" == "config" -o "${TYPE}" == "" ]; then
 					echo -e "${HC}## CONFIG: ${BASE_CONFIG}${NC}"
-					cd ${STORE}/state
+					cd ${STATE}
 					ls *-${APPNAME}-config.tgz 2>/dev/null | sed "s/\(.*\)-${APPNAME}-config.tgz/           \1/"
 					cd - &>/dev/null
 				fi
 				if [ "${TYPE}" == "secret" -o "${TYPE}" == "" ]; then
 					echo -e "${HC}## SECRET: ${BASE_SECRET}${NC}"
-					cd ${STORE}/state
+					cd ${STATE}
 					ls *-${APPNAME}-secret.tgz.enc 2>/dev/null | sed "s/\(.*\)-${APPNAME}-secret.tgz.enc/           \1/"
 					cd - &>/dev/null
 				fi
 				if [ "${TYPE}" == "data" -o "${TYPE}" == "" ]; then
 					echo -e "${HC}## DATA  : ${BASE_DATA}${NC}"
-					cd ${STORE}/data
+					cd ${STATE}
 					ls *-${APPNAME}-data.tgz.enc 2>/dev/null | sed "s/\(.*\)-${APPNAME}-data.tgz.enc/           \1/"
 					cd - &>/dev/null
 				fi
@@ -336,208 +272,25 @@ case $1 in
 				;;
 		esac
 		;;
-	"sshclean")
-		shift
-		NODES=${1:-${NODES}}
-
-		for NODE in ${NODES}
-		do
-			NODEIP=$(grep "[\t ]*${NODE}$" /etc/hosts | cut -d' ' -f1)
-			ssh-keygen -f ~/.ssh/known_hosts -R "${NODE}"
-			ssh-keygen -f ~/.ssh/known_hosts -R "[${NODE}]:${SECURE_PORT}"
-			ssh-keygen -f ~/.ssh/known_hosts -R "${NODEIP}"
-			ssh-keygen -f ~/.ssh/known_hosts -R "[${NODEIP}]:${SECURE_PORT}"
-		done
-		;;
-	"sshwait")
-		shift
-		NODES=${1:-${NODES}}
-
-		for NODE in ${NODES}
-		do
-			while ! [[ $(nc -w 5 "${NODE}" 22 <<< "\0" ) =~ "OpenSSH" ]] && \
-				! [[ $(nc -w 5 "${NODE}" ${SECURE_PORT} <<< "\0" ) =~ "OpenSSH" ]]
-			do
-				echo waiting ${NODE}...
-				sleep 5
-			done
-			echo ${NODE} is ready.
-		done
-		;;
-	"sshcopy")
-		shift
-		NODES=${1:-${NODES}}
-
-		for NODE in ${NODES}
-		do
-			ssh-copy-id -i ~/.ssh/id_rsa.pub "${OPERATOR}@${NODE}"
-		done
-		;;
-	"sshcopy-force")
-		shift
-		NODES=${1:-${NODES}}
-
-		for NODE in ${NODES}
-		do
-			ssh-copy-id -o "StrictHostKeyChecking no" -i ~/.ssh/id_rsa.pub "${OPERATOR}@${NODE}"
-		done
-		;;
-	"operate")
-		shift
-		case $1 in
-		"on")
-			for NODE in ${NODES}
-			do
-				${NODECTL_TTY} ${OPERATOR}@${NODE} \
-					"echo ${OPERATOR} ALL=\(ALL\) NOPASSWD: ALL | sudo tee /etc/sudoers.d/${OPERATOR}"
-			done
-			;;
-		"off")
-			for NODE in ${NODES}
-			do
-				${NODECTL_TTY} ${OPERATOR}@${NODE} \
-					"sudo -n rm /etc/sudoers.d/${OPERATOR}"
-			done
-			;;
-		esac
-		;;
-	"exec-for-all")
-		shift
-		$0 exec "${NODES}" $*
-		;;
-	"exec")
-		shift
-		NODES=$1
-		shift
-		COMMANDS=$*
-		for NODE in ${NODES}
-		do
-			eval ${NODECTL} ${OPERATOR}@${NODE} \"${COMMANDS}\"
-		done
-		;;
-	"apply")
-		shift
-		NODES=${1:-${NODES}}
-		shift
-
-		GRUBUSER="$(gpg -d ${GRUBUSER_FILE})"
-		GRUBPASS="$(gpg -d ${GRUBPASS_FILE})"
-
-		echo =========================================================================
-		echo preparing...
-		for NODE in ${NODES}
-		do
-			./policy-hosts/apply "${NODECTL}" "${OPERATOR}@${NODE}" "${HOSTFILE}"
-			./extra-aptproxy/apply "${NODECTL}" "${OPERATOR}@${NODE}" "${APTPROXY}"
-		done
-
-		echo =========================================================================
-		echo applying updates...
-		for NODE in ${NODES}
-		do
-			./install-update/install "${NODECTL}" "${OPERATOR}@${NODE}" &
-		done
-		wait
-
-		echo =========================================================================
-		echo applying docker...
-		for NODE in ${NODES}
-		do
-			./install-docker/install "${NODECTL}" "${OPERATOR}@${NODE}" "${OPERATOR}" &
-		done
-		wait
-
-		echo =========================================================================
-		echo applying logwatch...
-		for NODE in ${NODES}
-		do
-			./install-logwatch/install "${NODECTL}" "${OPERATOR}@${NODE}" "${SMTP}" &
-		done
-		wait
-
-		echo =========================================================================
-		echo applying other installations...
-		for NODE in ${NODES}
-		do
-			./install-kernel/install "${NODECTL}" "${OPERATOR}@${NODE}"
-			./policy-sshd/apply "${NODECTL}" "${OPERATOR}@${NODE}" "${SECURE_PORT}"
-			./policy-ntp/apply "${NODECTL}" "${OPERATOR}@${NODE}" "${NTP}"
-			./policy-root-no-login/apply "${NODECTL}" "${OPERATOR}@${NODE}"
-			./policy-root-mail-alias/apply "${NODECTL}" "${OPERATOR}@${NODE}" "${OPERATOR}" "${MAILTO}"
-			./policy-lock-cronjobs/apply "${NODECTL}" "${OPERATOR}@${NODE}"
-			./policy-grub-security/apply "${NODECTL}" "${OPERATOR}@${NODE}" "${GRUBUSER}" "${GRUBPASS}"
-			./policy-logrorate/apply "${NODECTL}" "${OPERATOR}@${NODE}"
-			./policy-docker-log-rotate/apply "${NODECTL}" "${OPERATOR}@${NODE}"
-			./policy-update-notification/apply "${NODECTL}" "${OPERATOR}@${NODE}"
-			./policy-disable-ipv6/apply "${NODECTL}" "${OPERATOR}@${NODE}"
-			./policy-iptables/apply "${NODECTL}" "${OPERATOR}@${NODE}" "${SECURE_PORT}"
-			./install-post-packages/install "${NODECTL}" "${OPERATOR}@${NODE}"
-			./install-docker-apps/install "${NODECTL}" "${OPERATOR}@${NODE}"
-			./extra-netplan/apply "${NODECTL}" "${OPERATOR}@${NODE}" "${NETPLAN}"
-			./extra-registry-proxy/apply "${NODECTL}" "${OPERATOR}@${NODE}" "${REGISTRYPROXYURL}"
-		done
-		;;
-	"check")
-		shift
-		NODES=${1:-${NODES}}
-
-		for NODE in ${NODES}
-		do
-			echo =========================================================================
-			echo NODE:${NODE} checking...
-			./policy-hosts/check "${NODECTL}" "${OPERATOR}@${NODE}" "${HOSTFILE}"
-			./policy-sshd/check "${NODECTL}" "${OPERATOR}@${NODE}" "${SECURE_PORT}"
-			./policy-ntp/check "${NODECTL}" "${OPERATOR}@${NODE}" "${NTP}"
-			./policy-root-no-login/check "${NODECTL}" "${OPERATOR}@${NODE}"
-			./policy-root-mail-alias/check "${NODECTL}" "${OPERATOR}@${NODE}" "${OPERATOR}" "${MAILTO}"
-			./policy-lock-cronjobs/check "${NODECTL}" "${OPERATOR}@${NODE}"
-			./policy-grub-security/check "${NODECTL}" "${OPERATOR}@${NODE}"
-			./policy-logrorate/check "${NODECTL}" "${OPERATOR}@${NODE}"
-			./policy-docker-log-rotate/check "${NODECTL}" "${OPERATOR}@${NODE}"
-			./policy-update-notification/check "${NODECTL}" "${OPERATOR}@${NODE}"
-			./policy-disable-ipv6/check "${NODECTL}" "${OPERATOR}@${NODE}"
-			./policy-iptables/check "${NODECTL}" "${OPERATOR}@${NODE}"
-			./check-security/check "${NODECTL}" "${OPERATOR}@${NODE}"
-			./check-port-inspect/check "${NODECTL}" "${OPERATOR}@${NODE}"
-			./check-hardware/check "${NODECTL}" "${OPERATOR}@${NODE}"
-		done
-		;;
-	"reboot")
-		shift
-		NODES=${1:-${NODES}}
-
-		for NODE in ${NODES}
-		do
-			echo =========================================================================
-			echo NODE:${NODE} rebooting...
-			${NODECTL} ${OPERATOR}@${NODE} "sudo shutdown -r now"
-		done
-		;;
-	"policy")
-		shift
-		POLICY=$1 ; shift
-		ACTION=$1 ; shift
-		NODES=${1:-${NODES}} ; shift
-		COMMANDS=$*
-		for NODE in ${NODES}
-		do
-			echo =========================================================================
-			echo NODE:${NODE} ${ACTION}...
-			./${POLICY}/${ACTION} "${NODECTL}" "${OPERATOR}@${NODE}" ${COMMANDS}
-		done
-		;;
-	*)
+	"")
 		echo $(basename $0) version
 		echo $(basename $0) env
 		echo $(basename $0) config ...
 		echo $(basename $0) secret-create
 		echo $(basename $0) "state [list/save/load] [config/secret/data] [state_name, ex: date-stage-env]"
-		echo $(basename $0) "[sshclean/sshwait/sshcopy/sshcopy-force] [nodes]"
-		echo $(basename $0) "operate [on/off]"
-		echo $(basename $0) "exec-for-all [commands]"
-		echo $(basename $0) "exec [nodes] [commands]"
-		echo $(basename $0) "[apply/check/reboot] [node]"
-		echo $(basename $0) "policy [policy] [install/apply/check] [node] [commands]"
+		# AppImplementing Section: usage
+		#------------------------------------------------------------------------------
+		source ./zss0.impl usage
+		#------------------------------------------------------------------------------
 		;;
+	# AppImplementing Section: commands
+	#------------------------------------------------------------------------------
+	*)
+		COMMAND=$1
+		shift
+		ARGS=$*
+		source ./zss0.impl command ${COMMAND} ${ARGS}
+		;;
+	#------------------------------------------------------------------------------
 esac
 
