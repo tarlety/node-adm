@@ -1,12 +1,12 @@
 #!/bin/bash
 
 # 0.6.0 backlogs
-#   - derived: node-adm, ceph-adm, kube-adm, zerus-test
+#   - derived: kube-apps-ctrl, docker-apps, node-adm, ceph-adm, kube-adm, zerus-test
 
 #==============================================================================
 # Copyright (c) 2019, tarlety@gmail.com
 #
-# Zerus Scripting Standard v0.5.5
+# Zerus Scripting Standard v0.5.7
 #
 # This standard defines script state management framework.
 # Following this framework, you can manage app states in a consistent way.
@@ -71,7 +71,7 @@
 #==============================================================================
 # Environments:
 
-ZSSVERSION=0.5.5
+ZSSVERSION=0.5.7
 # AppImplementing Section: app
 #------------------------------------------------------------------------------
 source ./zss0.impl app
@@ -97,7 +97,7 @@ source ./zss0.impl config
 for KEY in ${CONFIGKEYS}
 do
 	VARNAME=$(echo ${KEY} | tr '[:lower:]' '[:upper:]')
-	eval ${VARNAME}='$(cat ${CONFIG}/$KEY 2>/dev/null)'
+	eval declare -A ${VARNAME}='$(cat ${CONFIG}/${KEY} 2>/dev/null)'
 done
 
 GPGKEY=`cat ${CONFIG}/gpgkey 2>/dev/null`
@@ -126,7 +126,11 @@ case $1 in
 		for KEY in ${CONFIGKEYS}
 		do
 			KEY=$(echo ${KEY} | tr '[:lower:]' '[:upper:]')
-			eval echo - ${KEY}: \${${KEY}}
+			if [ "$(eval echo \${!${KEY}[@]})" == "0" ]; then
+				eval echo - ${KEY}: \${${KEY}}
+			else
+				eval echo - ${KEY}: "{\${!${KEY}[@]}} -\> {\${${KEY}[@]}}"
+			fi
 		done
 		echo - GPGKEY: ${GPGKEY} $(gpg -k ${GPGKEY} 2>/dev/null | sed -n '2p' | xargs)
 		echo "## REQUIREMENT:"
