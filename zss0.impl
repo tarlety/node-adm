@@ -6,7 +6,7 @@ case $1 in
 	"app")
 		PROJECTNAME=zerus
 		APPNAME=node-adm
-		APPVERSION=0.1.0
+		APPVERSION=0.1.1
 		;;
 	"config")
 		CONFIGKEYS="nodes nodectl nodectl_tty hostfile netplan aptproxyfile registryproxyurl secure_port dns1 dns2 ntp smtp operator"
@@ -137,7 +137,11 @@ case $1 in
 				;;
 			"exec-for-all")
 				shift
-				$0 exec "${NODES}" $*
+				COMMANDS=$*
+				for NODE in ${NODES}
+				do
+					eval ${NODECTL} ${OPERATOR}@${NODE} \"${COMMANDS}\"
+				done
 				;;
 			"exec")
 				shift
