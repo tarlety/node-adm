@@ -6,7 +6,7 @@ case $1 in
 	"app")
 		PROJECTNAME=zerus
 		APPNAME=node-adm
-		APPVERSION=0.1.1
+		APPVERSION=0.1.2
 		;;
 	"config")
 		CONFIGKEYS="nodes nodectl nodectl_tty hostfile netplan aptproxyfile registryproxyurl secure_port dns1 dns2 ntp smtp operator"
@@ -53,11 +53,11 @@ case $1 in
 		;;
 	"secret-create")
 		read -p "GRUBUSER:" GRUBUSER
-		echo "$GRUBUSER" | gpg -ear ${GPGKEYNAME} -o ${GRUBUSER_FILE}
+		echo "${GRUBUSER}" | gpg -ear ${GPGKEY} -o ${GRUBUSER_FILE}
 
 		grub-mkpasswd-pbkdf2
 		read -p "GRUBPASS (copy from grub.pbkdf2.sha512...to the end, and paste here):" GRUBPASS
-		echo "$GRUBPASS" | gpg -ear ${GPGKEYNAME} -o ${GRUBPASS_FILE}
+		echo "${GRUBPASS}" | gpg -ear ${GPGKEY} -o ${GRUBPASS_FILE}
 		;;
 	"state-data-save")
 		;;
