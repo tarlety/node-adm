@@ -6,7 +6,7 @@ case $1 in
 	"app")
 		PROJECTNAME=zerus
 		APPNAME=node-adm
-		APPVERSION=0.1.2
+		APPVERSION=0.1.3
 		;;
 	"config")
 		CONFIGKEYS="nodes nodectl nodectl_tty hostfile netplan aptproxyfile registryproxyurl secure_port dns1 dns2 ntp smtp operator"
@@ -33,7 +33,7 @@ case $1 in
 		DEFAULT_NODECTL_TTY='ssh -t'
 		DEFAULT_HOSTFILE="/etc/hosts"
 		DEFAULT_NETPLAN="" # 01-netplan
-		DEFAULT_APTPROXY="" # 01proxy
+		DEFAULT_APTPROXYFILE="" # 01proxy
 		DEFAULT_REGISTRYPROXYURL="http://10.0.2.2:5000"
 		DEFAULT_SECURE_PORT="2201"
 		DEFAULT_DNS1="8.8.8.8"
@@ -166,7 +166,7 @@ case $1 in
 				for NODE in ${NODES}
 				do
 					./policy-hosts/apply "${NODECTL}" "${OPERATOR}@${NODE}" "${HOSTFILE}"
-					./extra-aptproxy/apply "${NODECTL}" "${OPERATOR}@${NODE}" "${APTPROXY}"
+					./extra-aptproxy/apply "${NODECTL}" "${OPERATOR}@${NODE}" "${APTPROXYFILE}"
 				done
 
 				echo =========================================================================
