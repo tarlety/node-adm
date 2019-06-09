@@ -4,7 +4,8 @@
 # ARGUMENTS:
 #  $1 NODECTL	the command to control node.
 #  $2 NODE	which node to apply
-#  $3 PROXY	the registry proxy address and port.
+#  $3 PROXY	the registry proxy URL, including proto, address and port.
+#  $4 HOSTPORT	the registry proxy address and port.
 VERSION=0.1.0
 
 HC='\033[0;93m'
@@ -17,19 +18,29 @@ MODULENAME=registry-proxy
 NODECTL=${1:-ws ssh}
 NODE=${2:-ws}
 PROXY=${3:-}
+HOSTPORT=${4:-}
 
 echo -e "${HC}=========================================================================${NC}"
 echo -e "${HC}NODE-ADM MODULE: ${MODULENAME} ${VERSION}${NC}"
 echo NODECTL: ${NODECTL}
 echo NODE: ${NODE}
 echo PROXY: ${PROXY}
+echo HOSTPORT: ${CRT}
 echo
 
-if [ ! -z "${PROXY}" ]
-then
+if [ ! -z "${HOSTPORT}" ]; then
+	${NODECTL} ${NODE} "
+		openssl s_client -connect ${HOSTPORT} -showcerts < /dev/null 2>/dev/null \
+			| openssl x509 -outform PEM \
+			| sudo tee /usr/local/share/ca-certificates/registry-proxy.crt
+		sudo update-ca-certificates
+		"
+fi
+
+if [ ! -z "${PROXY}" ]; then
 	${NODECTL} ${NODE} "
 		sudo apt install moreutils jq -y ;
-	"
+		"
 
 	${NODECTL} ${NODE} "
 		sudo jq '. + {\"registry-mirrors\": [\"${PROXY}\"]}' /etc/docker/daemon.json | sudo sponge /etc/docker/daemon.json ;

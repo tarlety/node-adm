@@ -6,7 +6,7 @@ case $1 in
 	"app")
 		PROJECTNAME=zerus
 		APPNAME=node-adm
-		APPVERSION=0.1.3
+		APPVERSION=0.1.4
 		;;
 	"config")
 		CONFIGKEYS="nodes nodectl nodectl_tty hostfile netplan aptproxyfile registryproxyurl secure_port dns1 dns2 ntp smtp operator"
@@ -19,6 +19,7 @@ case $1 in
 			["netplan"]="customized netplan." \
 			["aptproxyfile"]="customized apt proxy configuration." \
 			["registryproxyurl"]="the registry proxy proto, address and port." \
+			["registryproxyhostport"]="the registry proxy address and port." \
 			["secure_port"]="re-configuring the SSH secure port for all nodes." \
 			["dns1"]="which DNS is used." \
 			["dns2"]="which DNS is used." \
@@ -34,7 +35,8 @@ case $1 in
 		DEFAULT_HOSTFILE="/etc/hosts"
 		DEFAULT_NETPLAN="" # 01-netplan
 		DEFAULT_APTPROXYFILE="" # 01proxy
-		DEFAULT_REGISTRYPROXYURL="http://10.0.2.2:5000"
+		DEFAULT_REGISTRYPROXYURL="https://10.0.2.2:5000"
+		DEFAULT_REGISTRYPROXYHOSTPORT="10.0.2.2:5000"
 		DEFAULT_SECURE_PORT="2201"
 		DEFAULT_DNS1="8.8.8.8"
 		DEFAULT_DNS2="8.8.4.4"
@@ -212,7 +214,7 @@ case $1 in
 					./install-post-packages/install "${NODECTL}" "${OPERATOR}@${NODE}"
 					./install-docker-apps/install "${NODECTL}" "${OPERATOR}@${NODE}"
 					./extra-netplan/apply "${NODECTL}" "${OPERATOR}@${NODE}" "${NETPLAN}"
-					./extra-registry-proxy/apply "${NODECTL}" "${OPERATOR}@${NODE}" "${REGISTRYPROXYURL}"
+					./extra-registry-proxy/apply "${NODECTL}" "${OPERATOR}@${NODE}" "${REGISTRYPROXYURL}" "${REGISTRYPROXYHOSTPORT}"
 				done
 				;;
 			"check")
