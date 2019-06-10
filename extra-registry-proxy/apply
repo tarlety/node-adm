@@ -25,7 +25,7 @@ echo -e "${HC}NODE-ADM MODULE: ${MODULENAME} ${VERSION}${NC}"
 echo NODECTL: ${NODECTL}
 echo NODE: ${NODE}
 echo PROXY: ${PROXY}
-echo HOSTPORT: ${CRT}
+echo HOSTPORT: ${HOSTPORT}
 echo
 
 if [ ! -z "${HOSTPORT}" ]; then
