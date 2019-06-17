@@ -120,6 +120,8 @@ case $1 in
 				;;
 			"operate")
 				shift
+				NODES=${2:-${NODES}}
+
 				case $1 in
 				"on")
 					for NODE in ${NODES}
