@@ -6,10 +6,10 @@ case $1 in
 	"app")
 		PROJECTNAME=zerus
 		APPNAME=node-adm
-		APPVERSION=0.1.2
+		APPVERSION=0.1.4
 		;;
 	"config")
-		CONFIGKEYS="nodes nodectl nodectl_tty hostfile netplan aptproxyfile registryproxyurl secure_port dns1 dns2 ntp smtp operator"
+		CONFIGKEYS="nodes nodectl nodectl_tty hostfile netplan aptproxyfile registryproxyhostport secure_port dns1 dns2 ntp smtp operator"
 		declare -A CONFIG_DESCRIPTIONS
 		CONFIG_DESCRIPTIONS=( \
 			["nodes"]="which nodes to apply." \
@@ -18,7 +18,7 @@ case $1 in
 			["hostfile"]="which hosts file is used for all nodes." \
 			["netplan"]="customized netplan." \
 			["aptproxyfile"]="customized apt proxy configuration." \
-			["registryproxyurl"]="the registry proxy proto, address and port." \
+			["registryproxyhostport"]="the registry proxy address and port." \
 			["secure_port"]="re-configuring the SSH secure port for all nodes." \
 			["dns1"]="which DNS is used." \
 			["dns2"]="which DNS is used." \
@@ -33,8 +33,8 @@ case $1 in
 		DEFAULT_NODECTL_TTY='ssh -t'
 		DEFAULT_HOSTFILE="/etc/hosts"
 		DEFAULT_NETPLAN="" # 01-netplan
-		DEFAULT_APTPROXY="" # 01proxy
-		DEFAULT_REGISTRYPROXYURL="http://10.0.2.2:5000"
+		DEFAULT_APTPROXYFILE="" # 01proxy
+		DEFAULT_REGISTRYPROXYHOSTPORT="registry:5000"
 		DEFAULT_SECURE_PORT="2201"
 		DEFAULT_DNS1="8.8.8.8"
 		DEFAULT_DNS2="8.8.4.4"
@@ -118,6 +118,8 @@ case $1 in
 				;;
 			"operate")
 				shift
+				NODES=${2:-${NODES}}
+
 				case $1 in
 				"on")
 					for NODE in ${NODES}
@@ -166,7 +168,7 @@ case $1 in
 				for NODE in ${NODES}
 				do
 					./policy-hosts/apply "${NODECTL}" "${OPERATOR}@${NODE}" "${HOSTFILE}"
-					./extra-aptproxy/apply "${NODECTL}" "${OPERATOR}@${NODE}" "${APTPROXY}"
+					./extra-aptproxy/apply "${NODECTL}" "${OPERATOR}@${NODE}" "${APTPROXYFILE}"
 				done
 
 				echo =========================================================================
@@ -212,7 +214,7 @@ case $1 in
 					./install-post-packages/install "${NODECTL}" "${OPERATOR}@${NODE}"
 					./install-docker-apps/install "${NODECTL}" "${OPERATOR}@${NODE}"
 					./extra-netplan/apply "${NODECTL}" "${OPERATOR}@${NODE}" "${NETPLAN}"
-					./extra-registry-proxy/apply "${NODECTL}" "${OPERATOR}@${NODE}" "${REGISTRYPROXYURL}"
+					./extra-registry-proxy/apply "${NODECTL}" "${OPERATOR}@${NODE}" "${REGISTRYPROXYHOSTPORT}"
 				done
 				;;
 			"check")
