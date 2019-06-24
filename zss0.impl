@@ -276,6 +276,14 @@ case $1 in
 		echo $(basename $0) "exec [nodes] [commands]"
 		echo $(basename $0) "[apply/check/reboot] [node]"
 		echo $(basename $0) "policy [policy] [install/apply/check] [node] [commands]"
+		echo ""
+		echo "Usage:"
+		echo "1. ./$(basename $0) config ..."
+		echo "2. ./$(basename $0) secret-create"
+		echo "3. ./$(basename $0) apply"
+		echo "4. ./$(basename $0) reboot"
+		echo "5. ./$(basename $0) config nodectl (for new secure_port)"
+		echo "6. ./$(basename $0) check"
 		;;
 esac
 
