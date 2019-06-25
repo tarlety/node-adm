@@ -1,0 +1,39 @@
+#!/bin/bash
+
+# node-adm module v0.1.0
+# ARGUMENTS:
+#  $1 NODECTL	the command to control node.
+#  $2 NODE	which node to apply
+VERSION=0.1.0
+
+HC='\033[0;93m'
+NC='\033[0m'
+
+# module:
+MODULENAME=security-updates
+
+# arguments:
+NODECTL=${1:-ws ssh}
+NODE=${2:-ws}
+
+echo -e "${HC}=========================================================================${NC}"
+echo -e "${HC}NODE-ADM MODULE: ${MODULENAME} ${VERSION}${NC}"
+echo NODECTL: ${NODECTL}
+echo NODE: ${NODE}
+echo
+
+echo -e "${HC}apt security sources:${NC}"
+${NODECTL} ${NODE} "
+	cat /etc/apt/sources.list | grep -v '^#' | grep -v '^[ \t]*$' | grep security
+	"
+
+echo -e "${HC}Uninstalled Security Packages${NC}"
+${NODECTL} ${NODE} "
+	sudo apt-get upgrade --dry-run -o Dir::Etc::SourceList=<(cat /etc/apt/sources.list | grep -v '^#' | grep -v '^[ \t]*$' | grep security)
+	"
+
+echo -e "${HC}Last Update History${NC}"
+${NODECTL} ${NODE} "
+	cat /var/log/apt/history.log | tail -4
+	"
+
