@@ -6,10 +6,10 @@ case $1 in
 	"app")
 		PROJECTNAME=zerus
 		APPNAME=node-adm
-		APPVERSION=0.1.5
+		APPVERSION=0.1.6
 		;;
 	"config")
-		CONFIGKEYS="nodes nodectl nodectl_tty hostfile netplan aptproxyfile registryproxyhostport secure_port dns1 dns2 ntp smtp operator"
+		CONFIGKEYS="nodes nodectl nodectl_tty hostfile netplan aptproxyfile registryproxyhostport secure_port dns1 dns2 ntp smtp operator mailto"
 		declare -A CONFIG_DESCRIPTIONS
 		CONFIG_DESCRIPTIONS=( \
 			["nodes"]="which nodes to apply." \
@@ -76,7 +76,7 @@ case $1 in
 
 				for NODE in ${NODES}
 				do
-					NODEIP=$(grep "[\t ]*${NODE}$" /etc/hosts | cut -d' ' -f1)
+					NODEIP=$(grep "[\t ]*${NODE}[ $]" /etc/hosts | cut -d' ' -f1)
 					ssh-keygen -f ~/.ssh/known_hosts -R "${NODE}"
 					ssh-keygen -f ~/.ssh/known_hosts -R "[${NODE}]:${SECURE_PORT}"
 					ssh-keygen -f ~/.ssh/known_hosts -R "${NODEIP}"
