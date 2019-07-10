@@ -5,7 +5,7 @@
 #  $1 NODECTL	the command to control node.
 #  $2 NODE	which node to apply
 #  $3 OPERATOR	the operator account of the node.
-VERSION=0.1.0
+VERSION=0.1.1
 
 HC='\033[0;93m'
 NC='\033[0m'
@@ -26,9 +26,10 @@ echo OPERATOR: ${OPERATOR}
 echo
 
 ${NODECTL} ${NODE} "
-sudo apt install docker.io -y ;
-sudo systemctl enable docker ;
-sudo ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf ;
-sudo usermod -a -G docker ${OPERATOR} ;
-"
+	sudo apt install docker.io -y ;
+	sudo apt-mark hold docker.io ;
+	sudo systemctl enable docker ;
+	sudo ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf ;
+	sudo usermod -a -G docker ${OPERATOR} ;
+	"
 
