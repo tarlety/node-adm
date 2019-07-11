@@ -76,7 +76,7 @@ case $1 in
 
 				for NODE in ${NODES}
 				do
-					NODEIP=$(grep "[\t ]*${NODE}[ $]" /etc/hosts | cut -d' ' -f1)
+					NODEIP=$(grep "[\t ]*${NODE}( |$)" /etc/hosts | cut -d' ' -f1)
 					ssh-keygen -f ~/.ssh/known_hosts -R "${NODE}"
 					ssh-keygen -f ~/.ssh/known_hosts -R "[${NODE}]:${SECURE_PORT}"
 					ssh-keygen -f ~/.ssh/known_hosts -R "${NODEIP}"
