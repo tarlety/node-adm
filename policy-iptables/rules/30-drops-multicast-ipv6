@@ -1,0 +1,5 @@
+#!/bin/bash
+
+sudo grep '# drop all ff02:0000:0000:0000:0000:0000:0000:0001 packets' /etc/ufw/before6.rules || \
+sudo sed -i -e 's/\(^# allow all on loopback$\)/# drop all ff02:0000:0000:0000:0000:0000:0000:0001 packets\n-A ufw6-before-input -d ff02:0000:0000:0000:0000:0000:0000:0001 -j DROP\n\1/g' /etc/ufw/before6.rules
+

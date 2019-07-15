@@ -1,0 +1,5 @@
+#!/bin/bash
+
+sudo grep '# drop all 224.0.0.1 packets' /etc/ufw/before.rules || \
+sudo sed -i -e 's/\(^# allow all on loopback$\)/# drop all 224.0.0.1 packets\n-A ufw-before-input -d 224.0.0.1 -j DROP\n\1/g' /etc/ufw/before.rules
+
