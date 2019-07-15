@@ -242,7 +242,7 @@ case $1 in
 					./check-hardware/check "${NODECTL}" "${OPERATOR}@${NODE}"
 					./check-key-software/check "${NODECTL}" "${OPERATOR}@${NODE}"
 					./check-security-updates/check "${NODECTL}" "${OPERATOR}@${NODE}"
-				done
+				done | tee -a ${DATA}/logs/$(date +%Y%m%d)-check.log
 				;;
 			"reboot")
 				shift
