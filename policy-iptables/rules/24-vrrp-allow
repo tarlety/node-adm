@@ -1,4 +1,4 @@
 #!/bin/bash
 
-sudo sed -i -e 's/^# allow all on loopback$/# allow all on vrrp\n-A ufw-before-input -p vrrp -j ACCEPT/g' /etc/ufw/before.rules
-
+sudo grep '# allow all on vrrp' /etc/ufw/before.rules || \
+sudo sed -i -e 's/\(^# allow all on loopback$\)/# allow all on vrrp\n-A ufw-before-input -p vrrp -j ACCEPT\n\n\1/g' /etc/ufw/before.rules
