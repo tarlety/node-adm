@@ -4,7 +4,7 @@
 # ARGUMENTS:
 #  $1 NODECTL	the command to control node.
 #  $2 NODE	which node to apply
-VERSION=0.1.0
+VERSION=0.1.1
 
 HC='\033[0;93m'
 NC='\033[0m'
@@ -53,7 +53,7 @@ echo -e "${HC}Is there any sudoers?${NC}"
 for SUDOER in $(${NODECTL} ${NODE} 'ls /etc/sudoers.d')
 do
 	[ "$SUDOER" == "README" ] \
-		|| echo -e "${HC}${MODULENAME} check FAIL${NC}: $SUDOER"
+		|| echo -e "${MODULENAME} check WARNING: $SUDOER"
 done
 
 echo -e "${HC}Is log filesize abnormal?${NC}"
