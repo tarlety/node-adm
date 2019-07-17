@@ -4,7 +4,7 @@
 # ARGUMENTS:
 #  $1 NODECTL	the command to control node.
 #  $2 NODE	which node to apply
-VERSION=0.1.0
+VERSION=0.1.1
 
 HC='\033[0;93m'
 NC='\033[0m'
@@ -27,4 +27,10 @@ for disk in $(${NODECTL} ${NODE} "lsblk | grep '^sd' | cut -d' ' -f1")
 do
 	${NODECTL} ${NODE} "sudo hdparm -t /dev/${disk}"
 done
+
+echo -e "${HC}$ dd for write performance${NC}"
+${NODECTL} ${NODE} "
+	dd if=/dev/zero of=${MODULENAME}-${VERSION}-write-performance-test conv=fdatasync bs=4k count=100000 ;
+	rm ${MODULENAME}-${VERSION}-write-performance-test
+	"
 
