@@ -4,7 +4,7 @@
 # ARGUMENTS:
 #  $1 NODECTL	the command to control node.
 #  $2 NODE	which node to apply
-VERSION=0.1.0
+VERSION=0.1.1
 
 HC='\033[0;93m'
 NC='\033[0m'
@@ -27,10 +27,16 @@ ${NODECTL} ${NODE} "
 	cat /etc/apt/sources.list | grep -v '^#' | grep -v '^[ \t]*$' | grep security
 	"
 
-echo -e "${HC}Uninstalled Security Packages${NC}"
+echo -e "${HC}Uninstalled Packages${NC}"
 ${NODECTL} ${NODE} "
-	sudo apt-get upgrade --dry-run -o Dir::Etc::SourceList=<(cat /etc/apt/sources.list | grep -v '^#' | grep -v '^[ \t]*$' | grep security)
+	sudo apt list --upgradable ;
 	"
+
+echo -e "${HC}Unattended Upgrades${NC}"
+${NODECTL} ${NODE} "
+	sudo unattended-upgrade --dry-run -d 2> /dev/null | grep Checking | grep security;
+	"
+
 
 echo -e "${HC}Last Update History${NC}"
 ${NODECTL} ${NODE} "
