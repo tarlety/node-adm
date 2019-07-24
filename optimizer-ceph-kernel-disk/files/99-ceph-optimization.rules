@@ -1,0 +1,2 @@
+# for ceph optimization, read ahead kb 8192
+ACTION=="add", KERNEL=="sd*", ATTR{bdi/read_ahead_kb}="8192"

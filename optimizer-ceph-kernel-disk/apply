@@ -1,0 +1,37 @@
+#!/bin/bash
+
+# node-adm module v0.1.0
+# ARGUMENTS:
+#  $1 NODECTL	the command to control node.
+#  $2 NODE	which node to apply
+VERSION=0.1.0
+
+HC='\033[0;93m'
+NC='\033[0m'
+
+# module:
+MODULENAME=optimizer-ceph-kernel-disk
+
+# arguments:
+NODECTL=${1:-ws ssh}
+NODE=${2:-ws}
+
+echo -e "${HC}=========================================================================${NC}"
+echo -e "${HC}NODE-ADM MODULE: ${MODULENAME} ${VERSION}${NC}"
+echo NODECTL: ${NODECTL}
+echo NODE: ${NODE}
+echo
+
+${NODECTL} ${NODE} "
+grep -F 'NODE-ADM MODULE ${MODULENAME} 0: ceph optimizer' /etc/sysctl.conf || {
+	echo '# NODE-ADM MODULE ${MODULENAME} 0: ceph optimizer' | sudo tee -a /etc/sysctl.conf ;
+	echo 'kernel.msgmnb = 65536' | sudo tee -a /etc/sysctl.conf ;
+	echo 'kernel.msgmax = 65536' | sudo tee -a /etc/sysctl.conf ;
+	echo 'kernel.shmmax = 68719476736' | sudo tee -a /etc/sysctl.conf ;
+	echo 'kernel.shmall = 4294967296' | sudo tee -a /etc/sysctl.conf ;
+	echo 'kernel.pid_max = 4194303' | sudo tee -a /etc/sysctl.conf ;
+	sudo sysctl -p ;
+} ;
+"
+
+cat $(dirname $0)/files/99-ceph-optimization.rules | ${NODECTL} ${NODE} "sudo tee /etc/udev/rules.d/99-ceph-optimization.rules"
