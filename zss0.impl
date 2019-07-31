@@ -6,7 +6,7 @@ case $1 in
 	"app")
 		PROJECTNAME=zerus
 		APPNAME=node-adm
-		APPVERSION=0.1.9
+		APPVERSION=0.1.11
 		;;
 	"config")
 		CONFIGKEYS="nodes nodectl nodectl_tty hostfile netplan aptproxyfile registryproxyhostport secure_port dns1 dns2 ntp smtp operator mailto"
@@ -116,8 +116,8 @@ case $1 in
 				for NODE in ${NODES}
 				do
 					[ -e ~/.ssh/id_rsa_${OPERATOR}.pub ] \
-					       	&& ssh-copy-id -i ~/.ssh/id_rsa_${OPERATOR}.pub "${OPERATOR}@${NODE}" \
-					       	|| ssh-copy-id -i ~/.ssh/id_rsa "${OPERATOR}@${NODE}"
+					       	&& ssh-copy-id -o "StrictHostKeyChecking no" -i ~/.ssh/id_rsa_${OPERATOR}.pub "${OPERATOR}@${NODE}" \
+					       	|| ssh-copy-id -o "StrictHostKeyChecking no" -i ~/.ssh/id_rsa "${OPERATOR}@${NODE}"
 				done
 				;;
 			"operate")
@@ -219,6 +219,8 @@ case $1 in
 					./install-docker-apps/install "${NODECTL}" "${OPERATOR}@${NODE}"
 					./extra-netplan/apply "${NODECTL}" "${OPERATOR}@${NODE}" "${NETPLAN}"
 					./extra-registry-proxy/apply "${NODECTL}" "${OPERATOR}@${NODE}" "${REGISTRYPROXYHOSTPORT}"
+					./optimizer-ceph-kernel-disk/apply "${NODECTL}" "${OPERATOR}@${NODE}"
+					./optimizer-kernel-network/apply "${NODECTL}" "${OPERATOR}@${NODE}"
 				done
 				;;
 			"check")
@@ -246,6 +248,8 @@ case $1 in
 					./check-hardware/check "${NODECTL}" "${OPERATOR}@${NODE}"
 					./check-key-software/check "${NODECTL}" "${OPERATOR}@${NODE}"
 					./check-security-updates/check "${NODECTL}" "${OPERATOR}@${NODE}"
+					./optimizer-ceph-kernel-disk/check "${NODECTL}" "${OPERATOR}@${NODE}"
+					./optimizer-kernel-network/check "${NODECTL}" "${OPERATOR}@${NODE}"
 				done | tee -a ${DATA}/logs/$(date +%Y%m%d)-check.log
 				;;
 			"reboot")
