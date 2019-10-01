@@ -6,7 +6,7 @@ case $1 in
 	"app")
 		PROJECTNAME=zerus
 		APPNAME=node-adm
-		APPVERSION=0.1.12
+		APPVERSION=0.1.13
 		;;
 	"config")
 		CONFIGKEYS="nodes nodectl nodectl_tty hostfile netplan aptproxyfile registryproxyhostport secure_port dns1 dns2 ntp smtp operator mailto"
@@ -300,6 +300,20 @@ case $1 in
 					fi
 				done
 				;;
+			"rm")
+				shift
+				NODES=$*
+				for NODE in ${NODES}
+				do
+					dig "${NODE}" | grep -v '^;' | grep "${NODE}"
+					if [ "$?" -eq "0" ]
+					then
+						echo "RM NODE: ${NODE}"
+						$0 sshclean ${NODE}
+						$0 config nodes "$(./zss0 env NODES | sed "s/${NODE}//g")"
+					fi
+				done
+				;;
 		esac
 		;;
 	#------------------------------------------------------------------------------
@@ -310,7 +324,7 @@ case $1 in
 		echo $(basename $0) "exec [nodes] [commands]"
 		echo $(basename $0) "[apply/check/reboot] [node]"
 		echo $(basename $0) "policy [policy] [install/apply/check] [node] [commands]"
-		echo $(basename $0) "add [nodes]"
+		echo $(basename $0) "[add/rm] [nodes]"
 		echo ""
 		echo "Usage:"
 		echo "1. ./$(basename $0) config ..."
