@@ -6,7 +6,7 @@ case $1 in
 	"app")
 		PROJECTNAME=zerus
 		APPNAME=node-adm
-		APPVERSION=0.1.11
+		APPVERSION=0.1.12
 		;;
 	"config")
 		CONFIGKEYS="nodes nodectl nodectl_tty hostfile netplan aptproxyfile registryproxyhostport secure_port dns1 dns2 ntp smtp operator mailto"
@@ -276,7 +276,31 @@ case $1 in
 					./${POLICY}/${ACTION} "${NODECTL}" "${OPERATOR}@${NODE}" ${COMMANDS}
 				done
 				;;
-				esac
+			"add")
+				shift
+				NODES=$*
+				for NODE in ${NODES}
+				do
+					dig "${NODE}" | grep -v '^;' | grep "${NODE}"
+					if [ "$?" -eq "0" ]
+					then
+						echo "ADD NODE: ${NODE}"
+						$0 config nodes "$($0 env NODES) ${NODE}"
+						SSHPORT=$($0 env | grep "SECURE_PORT" | cut -d: -f2)
+						$0 state save config staging
+						$0 config nodectl 'ssh'
+						$0 config nodectl_tty 'ssh -t'
+						$0 sshclean ${NODE}
+						$0 sshwait ${NODE}
+						$0 sshcopy-force ${NODE}
+						$0 operate on ${NODE}
+						$0 apply ${NODE}
+						$0 reboot ${NODE}
+						$0 state load config staging
+					fi
+				done
+				;;
+		esac
 		;;
 	#------------------------------------------------------------------------------
 	"usage")
@@ -286,6 +310,7 @@ case $1 in
 		echo $(basename $0) "exec [nodes] [commands]"
 		echo $(basename $0) "[apply/check/reboot] [node]"
 		echo $(basename $0) "policy [policy] [install/apply/check] [node] [commands]"
+		echo $(basename $0) "add [nodes]"
 		echo ""
 		echo "Usage:"
 		echo "1. ./$(basename $0) config ..."
