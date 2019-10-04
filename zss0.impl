@@ -6,7 +6,7 @@ case $1 in
 	"app")
 		PROJECTNAME=zerus
 		APPNAME=node-adm
-		APPVERSION=0.1.13
+		APPVERSION=0.1.14
 		;;
 	"config")
 		CONFIGKEYS="nodes nodectl nodectl_tty hostfile netplan aptproxyfile registryproxyhostport secure_port dns1 dns2 ntp smtp operator mailto"
@@ -90,6 +90,7 @@ case $1 in
 				for NODE in ${NODES}
 				do
 					while ! [[ $(nc -w 5 "${NODE}" 22 <<< "\0" ) =~ "OpenSSH" ]] && \
+						! [[ $(nc -w 5 "${NODE}" 2222 <<< "\0" ) =~ "OpenSSH" ]] && \
 						! [[ $(nc -w 5 "${NODE}" ${SECURE_PORT} <<< "\0" ) =~ "OpenSSH" ]]
 					do
 						echo waiting ${NODE}...
