@@ -6,7 +6,7 @@ case $1 in
 	"app")
 		PROJECTNAME=zerus
 		APPNAME=node-adm
-		APPVERSION=0.1.12
+		APPVERSION=0.1.13
 		;;
 	"config")
 		CONFIGKEYS="nodes nodectl nodectl_tty hostfile netplan aptproxyfile registryproxyhostport secure_port dns1 dns2 ntp smtp operator mailto"
@@ -211,7 +211,7 @@ case $1 in
 					./policy-lock-cronjobs/apply "${NODECTL}" "${OPERATOR}@${NODE}"
 					./policy-grub-security/apply "${NODECTL}" "${OPERATOR}@${NODE}" "${GRUBUSER}" "${GRUBPASS}"
 					./policy-logrorate/apply "${NODECTL}" "${OPERATOR}@${NODE}"
-					./policy-docker-log-rotate/apply "${NODECTL}" "${OPERATOR}@${NODE}"
+					./policy-docker-config/apply "${NODECTL}" "${OPERATOR}@${NODE}"
 					./policy-update-notification/apply "${NODECTL}" "${OPERATOR}@${NODE}"
 					./policy-disable-ipv6/apply "${NODECTL}" "${OPERATOR}@${NODE}"
 					./policy-iptables/apply "${NODECTL}" "${OPERATOR}@${NODE}" "${SECURE_PORT}"
@@ -239,7 +239,7 @@ case $1 in
 					./policy-lock-cronjobs/check "${NODECTL}" "${OPERATOR}@${NODE}"
 					./policy-grub-security/check "${NODECTL}" "${OPERATOR}@${NODE}"
 					./policy-logrorate/check "${NODECTL}" "${OPERATOR}@${NODE}"
-					./policy-docker-log-rotate/check "${NODECTL}" "${OPERATOR}@${NODE}"
+					./policy-docker-config/check "${NODECTL}" "${OPERATOR}@${NODE}"
 					./policy-update-notification/check "${NODECTL}" "${OPERATOR}@${NODE}"
 					./policy-disable-ipv6/check "${NODECTL}" "${OPERATOR}@${NODE}"
 					./policy-iptables/check "${NODECTL}" "${OPERATOR}@${NODE}"

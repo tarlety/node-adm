@@ -10,7 +10,7 @@ HC='\033[0;93m'
 NC='\033[0m'
 
 # module:
-MODULENAME=docker-log-rotate
+MODULENAME=docker-config
 
 # arguments:
 NODECTL=${1:-ws ssh}
@@ -22,6 +22,17 @@ echo NODECTL: ${NODECTL}
 echo NODE: ${NODE}
 echo
 
-${NODECTL} ${NODE} "grep 'max-size' /etc/docker/daemon.json" \
-	|| echo -e "${HC}${MODULENAME} check FAIL${NC}"
+cat <<EOF | ${NODECTL} ${NODE} "sudo -n tee /etc/docker/daemon.json"
+{
+  "log-driver": "json-file",
+  "log-opts": {
+    "max-size": "100m",
+    "max-file": "10"
+  },
+  "bip": "192.168.0.1/16",
+  "default-address-pools": [
+     {"base": "192.168.0.0/16", "size": 24}
+  ]
+}
+EOF
 
