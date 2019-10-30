@@ -4,7 +4,7 @@
 # ARGUMENTS:
 #  $1 NODECTL	the command to control node.
 #  $2 NODE	which node to apply
-VERSION=0.1.0
+VERSION=0.1.1
 
 HC='\033[0;93m'
 NC='\033[0m'
@@ -21,6 +21,14 @@ echo -e "${HC}NODE-ADM MODULE: ${MODULENAME} ${VERSION}${NC}"
 echo NODECTL: ${NODECTL}
 echo NODE: ${NODE}
 echo
+
+echo -e "${HC}$ kernel version${NC}"
+${NODECTL} ${NODE} "
+	uname -r ;
+	dpkg --get-selections | grep linux-image | grep '[^e]install$' ;
+	dpkg --get-selections | grep linux-headers | grep '[^e]install$' ;
+	dpkg --get-selections | grep linux-modules | grep '[^e]install$' ;
+	"
 
 echo -e "${HC}$ docker version${NC}"
 ${NODECTL} ${NODE} "
