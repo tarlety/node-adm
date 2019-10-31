@@ -4,7 +4,7 @@
 # ARGUMENTS:
 #  $1 NODECTL		the command to control node.
 #  $2 NODE		which node to apply
-VERSION=0.1.0
+VERSION=0.1.1
 
 HC='\033[0;93m'
 NC='\033[0m'
@@ -23,7 +23,7 @@ echo NODE: ${NODE}
 echo
 
 ${NODECTL} ${NODE} "
-	echo kernel parameters: ;
+	echo somaxconn: ;
 	cat /proc/sys/net/core/somaxconn ;
 	"
 
