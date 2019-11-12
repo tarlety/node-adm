@@ -5,7 +5,7 @@
 #  $1 NODECTL	the command to control node.
 #  $2 NODE	which node to apply
 #  $3 SMTP	the mail server address
-VERSION=0.1.0
+VERSION=0.1.1
 
 HC='\033[0;93m'
 NC='\033[0m'
@@ -34,6 +34,13 @@ sudo debconf-set-selections <<< 'postfix postfix/main_mailer_type string "Satell
 sudo apt install logwatch -y;
 "
 
-cat $(dirname $0)/files/logwatch.conf | ${NODECTL} ${NODE} "sudo tee /etc/logwatch/conf"
-cat $(dirname $0)/files/kernel.conf | ${NODECTL} ${NODE} "sudo tee /etc/logwatch/conf/services"
+cat ./install-logwatch/files/logwatch.conf | ${NODECTL} ${NODE} "sudo tee /etc/logwatch/conf/logwatch.conf"
+cat ./install-logwatch/files/kernel.conf | ${NODECTL} ${NODE} "sudo tee /etc/logwatch/conf/services/kernel.conf"
+cat ./install-logwatch/files/ufw.conf | ${NODECTL} ${NODE} "sudo tee /etc/logwatch/conf/services/ufw.conf"
+cat ./install-logwatch/files/ufw | ${NODECTL} ${NODE} "sudo tee /etc/logwatch/scripts/services/ufw"
+
+${NODECTL} ${NODE} "
+sudo cp /usr/share/logwatch/default.conf/services/knockd.conf /etc/logwatch/conf/services ;
+sudo chmod 750 /etc/logwatch/scripts/services/ufw ;
+"
 
