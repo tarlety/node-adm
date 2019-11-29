@@ -3,7 +3,7 @@
 
 LOGFILE=/var/log/syslog
 FROMDATE=$(date --date="1 day ago" +"%b %_d %H")
-FROMLINE=$(grep -n "${FROMDATE}" ${LOGFILE} | head -n 1 | awk 'BEGIN { FS = ":" } { print $1 }')
+FROMLINE=$(grep -a -n "${FROMDATE}" ${LOGFILE} | head -n 1 | awk 'BEGIN { FS = ":" } { print $1 }')
 
 # Need to catch it if there are less than 24 hours of logs, and analyse the whole file.
 if [ -z "${FROMLINE}" ] ; then
@@ -11,15 +11,15 @@ FROMDATE=`head -n 1 ${LOGFILE} | awk '{ print $1 " " $2 " "$3}'`
 FROMLINE=1
 fi
 
-TOTALEVENTS=`tail -n +${FROMLINE} ${LOGFILE} | grep "UFW BLOCK" | wc -l`
+TOTALEVENTS=`tail -n +${FROMLINE} ${LOGFILE} | grep -a "UFW BLOCK" | wc -l`
 echo "==== Processing ${LOGFILE}  ======"
 echo "Starting Date = ${FROMDATE}:00 (Line ${FROMLINE})"
 echo "Total Events = ${TOTALEVENTS}"
 echo
 echo "==== 20 Commonest Ports Blocked ============"
 echo "  Tries   Port"
-tail -n +${FROMLINE} ${LOGFILE} | grep "UFW BLOCK" | sed 's/.*DPT=//' | sed 's/ WINDOW=.*//' | sed 's/ LEN=.*//' | sort -n | uniq -c | sort -nr | head -n 20
+tail -n +${FROMLINE} ${LOGFILE} | grep -a "UFW BLOCK" | sed 's/.*DPT=//' | sed 's/ WINDOW=.*//' | sed 's/ LEN=.*//' | sort -n | uniq -c | sort -nr | head -n 20
 echo
 echo "==== 20 Commonest Hosts Blocked ============"
 echo "  Tries   Host"
-tail -n +${FROMLINE} ${LOGFILE} | grep "UFW BLOCK" | sed 's/.*SRC=//' | sed 's/ DST=.*//' | sort -n | uniq -c | sort -nr | head -n 20
+tail -n +${FROMLINE} ${LOGFILE} | grep -a "UFW BLOCK" | sed 's/.*SRC=//' | sed 's/ DST=.*//' | sort -n | uniq -c | sort -nr | head -n 20
