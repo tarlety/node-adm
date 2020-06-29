@@ -6,7 +6,7 @@ case $1 in
 	"app")
 		PROJECTNAME=zerus
 		APPNAME=node-adm
-		APPVERSION=0.1.14
+		APPVERSION=0.1.15
 		;;
 	"config")
 		CONFIGKEYS="nodes nodectl nodectl_tty hostfile netplan aptproxyfile registryproxyhostport secure_port dns1 dns2 ntp smtp operator mailto"
@@ -274,8 +274,9 @@ case $1 in
 				do
 					echo =========================================================================
 					echo NODE:${NODE} ${ACTION}...
-					./${POLICY}/${ACTION} "${NODECTL}" "${OPERATOR}@${NODE}" ${COMMANDS}
+					./${POLICY}/${ACTION} "${NODECTL}" "${OPERATOR}@${NODE}" ${COMMANDS} &
 				done
+				wait
 				;;
 			"add")
 				shift
