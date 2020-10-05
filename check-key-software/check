@@ -2,9 +2,10 @@
 
 # node-adm module v0.1.0
 # ARGUMENTS:
-#  $1 NODECTL	the command to control node.
-#  $2 NODE	which node to apply
-VERSION=0.1.3
+#  $1 NODECTL	  the command to control node.
+#  $2 NODE      which node to apply
+#  $3 COMPONENT	which component to check
+VERSION=0.1.4
 
 HC='\033[0;93m'
 NC='\033[0m'
@@ -15,32 +16,82 @@ MODULENAME=key-software
 # arguments:
 NODECTL=${1:-ws ssh}
 NODE=${2:-ws}
+COMPONENT=${3:-}
 
 echo -e "${HC}=========================================================================${NC}"
 echo -e "${HC}NODE-ADM MODULE: ${MODULENAME} ${VERSION}${NC}"
 echo NODECTL: ${NODECTL}
 echo NODE: ${NODE}
+echo COMPONENT: ${COMPONENT}
 echo
 
-echo -e "${HC}$ kernel version${NC}"
-${NODECTL} ${NODE} "
-	uname -r ;
-	dpkg --get-selections | grep linux-image | grep '[^e]install$' ;
-	dpkg --get-selections | grep linux-headers | grep '[^e]install$' ;
-	dpkg --get-selections | grep linux-modules | grep '[^e]install$' ;
-	"
+case "${COMPONENT}" in
+  "ubuntu")
+    FLAG_UBUNTU=1
+    ;;
+  "kernel")
+    FLAG_KERNEL=1
+    ;;
+  "kernel-pkg")
+    FLAG_KERNEL_PACKAGE=1
+    ;;
+  "docker")
+    FLAG_DOCKER=1
+    ;;
+  "ceph")
+    FLAG_CEPH=1
+    ;;
+  "kubernetes")
+    FLAG_KUBERNETES=1
+    ;;
+  *)
+    FLAG_UBUNTU=1
+    FLAG_KERNEL=1
+    FLAG_KERNEL_PACKAGE=1
+    FLAG_DOCKER=1
+    FLAG_CEPH=1
+    FLAG_KUBERNETES=1
+    ;;
+esac
 
-echo -e "${HC}$ docker version${NC}"
-${NODECTL} ${NODE} "
-	docker version
-	"
+if [ "${FLAG_UBUNTU}" == "1" ]
+then
+  echo -e "${HC}$ ubuntu version${NC}"
+  echo "ubuntu: $(${NODECTL} ${NODE} 'cat /etc/issue.net')"
+fi
 
-echo -e "${HC}$ ceph version${NC}"
-${NODECTL} ${NODE} "
-	sudo ceph version
-	"
+if [ "${FLAG_KERNEL}" == "1" ]
+then
+  echo -e "${HC}$ kernel version${NC}"
+  echo "kernel: $(${NODECTL} ${NODE} 'uname -r')"
+fi
 
-echo -e "${HC}$ kubernetes version${NC}"
-${NODECTL} ${NODE} "
-	kubelet --version
-	"
+if [ "${FLAG_KERNEL_PACKAGE}" == "1" ]
+then
+  echo -e "${HC}$ kernel packages${NC}"
+  echo "kernel-pkg:"
+  ${NODECTL} ${NODE} "
+    dpkg --get-selections | grep linux-image | grep '[^e]install$'
+    dpkg --get-selections | grep linux-headers | grep '[^e]install$'
+    dpkg --get-selections | grep linux-modules | grep '[^e]install$'
+    "
+fi
+
+if [ "${FLAG_DOCKER}" == "1" ]
+then
+  echo -e "${HC}$ docker version${NC}"
+  echo "docker: $(${NODECTL} ${NODE} 'echo `which docker 2>&1 >/dev/null && docker version --format '{{.Server.Version}}'`')"
+fi
+
+if [ "${FLAG_CEPH}" == "1" ]
+then
+  echo -e "${HC}$ ceph version${NC}"
+  echo "ceph: $(${NODECTL} ${NODE} 'which ceph 2>&1 > /dev/null && sudo ceph version')"
+fi
+
+if [ "${FLAG_KUBERNETES}" == "1" ]
+then
+  echo -e "${HC}$ kubernetes version${NC}"
+  echo "kubernetes: $(${NODECTL} ${NODE} 'which kubelet 2>&1 > /dev/null && kubelet --version')"
+fi
+
