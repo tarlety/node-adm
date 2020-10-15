@@ -5,7 +5,7 @@
 #  $1 NODECTL	  the command to control node.
 #  $2 NODE      which node to apply
 #  $3 COMPONENT	which component to check
-VERSION=0.1.4
+VERSION=0.1.5
 
 HC='\033[0;93m'
 NC='\033[0m'
@@ -86,7 +86,10 @@ fi
 if [ "${FLAG_CEPH}" == "1" ]
 then
   echo -e "${HC}$ ceph version${NC}"
-  echo "ceph: $(${NODECTL} ${NODE} 'which ceph 2>&1 > /dev/null && sudo ceph version')"
+  CEPHPKG="$(${NODECTL} ${NODE} 'which ceph 2>&1 > /dev/null && sudo ceph version')"
+  CEPHDAEMON="$(${NODECTL} ${NODE} 'docker ps --format "{{.Image}}" 2>&1 | grep ceph | sort | uniq')"
+  [ -z "${CEPHPKG}" ] || echo "ceph package: ${CEPHPKG}"
+  [ -z "${CEPHDAEMON}" ] || echo "ceph daemon: ${CEPHDAEMON}"
 fi
 
 if [ "${FLAG_KUBERNETES}" == "1" ]
