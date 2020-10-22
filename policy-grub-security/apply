@@ -33,6 +33,9 @@ then
 	echo NO NECESSARY ARGUMENTS - SKIP THIS POLICY.
 else
 
+# [ref] https://selivan.github.io/2017/12/21/grub2-password-for-all-but-default-menu-entries.html
+# Protect booting with a username/password except normal boot (10_linux).
+
 cat $(dirname $0)/01_password.template | ${NODECTL} ${NODE} "sudo -n tee /etc/grub.d/01_password"
 ${NODECTL} ${NODE} "
 sudo chown root:root /etc/grub.d/01_password;
