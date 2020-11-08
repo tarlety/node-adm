@@ -6,7 +6,7 @@ case $1 in
 	"app")
 		PROJECTNAME=zerus
 		APPNAME=node-adm
-		APPVERSION=0.1.16
+		APPVERSION=0.1.17
 		;;
 	"config")
 		CONFIGKEYS="nodes nodectl nodectl_tty hostfile netplan aptproxyfile registryproxyhostport secure_port dns1 dns2 ntp smtp operator mailto"
@@ -34,7 +34,7 @@ case $1 in
 		DEFAULT_HOSTFILE="/etc/hosts"
 		DEFAULT_NETPLAN="" # 01-netplan
 		DEFAULT_APTPROXYFILE="" # 01proxy
-		DEFAULT_REGISTRYPROXYHOSTPORT="registry:5000"
+		DEFAULT_REGISTRYPROXYHOSTPORT=""
 		DEFAULT_SECURE_PORT="2201"
 		DEFAULT_DNS1="8.8.8.8"
 		DEFAULT_DNS2="8.8.4.4"
