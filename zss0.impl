@@ -6,7 +6,7 @@ case $1 in
 	"app")
 		PROJECTNAME=zerus
 		APPNAME=node-adm
-		APPVERSION=0.1.15
+		APPVERSION=0.1.16
 		;;
 	"config")
 		CONFIGKEYS="nodes nodectl nodectl_tty hostfile netplan aptproxyfile registryproxyhostport secure_port dns1 dns2 ntp smtp operator mailto"
@@ -107,7 +107,7 @@ case $1 in
 				do
 					[ -e ~/.ssh/id_rsa_${OPERATOR}.pub ] \
 					       	&& ssh-copy-id -i ~/.ssh/id_rsa_${OPERATOR}.pub "${OPERATOR}@${NODE}" \
-					       	|| ssh-copy-id -i ~/.ssh/id_rsa "${OPERATOR}@${NODE}"
+					       	|| ssh-copy-id -i ~/.ssh/id_rsa.pub "${OPERATOR}@${NODE}"
 				done
 				;;
 			"sshcopy-force")
@@ -118,7 +118,7 @@ case $1 in
 				do
 					[ -e ~/.ssh/id_rsa_${OPERATOR}.pub ] \
 					       	&& ssh-copy-id -o "StrictHostKeyChecking no" -i ~/.ssh/id_rsa_${OPERATOR}.pub "${OPERATOR}@${NODE}" \
-					       	|| ssh-copy-id -o "StrictHostKeyChecking no" -i ~/.ssh/id_rsa "${OPERATOR}@${NODE}"
+					       	|| ssh-copy-id -o "StrictHostKeyChecking no" -i ~/.ssh/id_rsa.pub "${OPERATOR}@${NODE}"
 				done
 				;;
 			"operate")
