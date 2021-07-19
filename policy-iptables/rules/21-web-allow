@@ -2,5 +2,5 @@
 
 # iptables -A INPUT -m multiport -p tcp 80,443 -j ACCEPT -m comment --comment 'node-adm'
 
-sudo ufw allow in 80/tcp
-sudo ufw allow in 443/tcp
+sudo ufw allow in 80/tcp comment 'node-adm'
+sudo ufw allow in 443/tcp comment 'node-adm'

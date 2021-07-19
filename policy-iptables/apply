@@ -5,7 +5,7 @@
 #  $1 NODECTL	the command to control node.
 #  $2 NODE	which node to apply
 #  $3 SSHPORT	which ssh port to allow
-VERSION=0.1.1
+VERSION=0.1.2
 
 HC='\033[0;93m'
 NC='\033[0m'

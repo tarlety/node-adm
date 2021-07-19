@@ -2,4 +2,4 @@
 
 # iptables -A INPUT -p tcp --dport ${SSHPORT} -j ACCEPT -m comment --comment 'node-adm'
 
-sudo ufw allow in ${SSHPORT}/tcp
+sudo ufw allow in ${SSHPORT}/tcp comment 'node-adm'
