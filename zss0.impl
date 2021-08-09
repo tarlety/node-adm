@@ -6,7 +6,7 @@ case $1 in
 	"app")
 		PROJECTNAME=zerus
 		APPNAME=node-adm
-		APPVERSION=0.1.17
+		APPVERSION=0.2.0
 		;;
 	"config")
 		CONFIGKEYS="nodes nodectl nodectl_tty hostfile netplan aptproxyfile registryproxyhostport secure_port dns1 dns2 ntp smtp operator mailto"
@@ -216,6 +216,7 @@ case $1 in
 					./policy-update-notification/apply "${NODECTL}" "${OPERATOR}@${NODE}"
 					./policy-disable-ipv6/apply "${NODECTL}" "${OPERATOR}@${NODE}"
 					./policy-iptables/apply "${NODECTL}" "${OPERATOR}@${NODE}" "${SECURE_PORT}"
+					./policy-dnscache-enable/apply "${NODECTL}" "${OPERATOR}@${NODE}"
 					./install-post-packages/install "${NODECTL}" "${OPERATOR}@${NODE}"
 					./install-docker-apps/install "${NODECTL}" "${OPERATOR}@${NODE}"
 					./extra-netplan/apply "${NODECTL}" "${OPERATOR}@${NODE}" "${NETPLAN}"
@@ -244,6 +245,7 @@ case $1 in
 					./policy-update-notification/check "${NODECTL}" "${OPERATOR}@${NODE}"
 					./policy-disable-ipv6/check "${NODECTL}" "${OPERATOR}@${NODE}"
 					./policy-iptables/check "${NODECTL}" "${OPERATOR}@${NODE}"
+					./policy-dnscache-enable/check "${NODECTL}" "${OPERATOR}@${NODE}"
 					./check-security/check "${NODECTL}" "${OPERATOR}@${NODE}"
 					./check-port-inspect/check "${NODECTL}" "${OPERATOR}@${NODE}"
 					./check-hardware/check "${NODECTL}" "${OPERATOR}@${NODE}"

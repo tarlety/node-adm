@@ -1,0 +1,30 @@
+#!/bin/bash
+
+# node-adm module v0.1.0
+# ARGUMENTS:
+#  $1 NODECTL	the command to control node.
+#  $2 NODE	which node to apply
+VERSION=0.1.0
+
+HC='\033[0;93m'
+NC='\033[0m'
+
+# module:
+MODULENAME=dnscache-enable
+
+# arguments:
+NODECTL=${1:-ws ssh}
+NODE=${2:-ws}
+
+echo -e "${HC}=========================================================================${NC}"
+echo -e "${HC}NODE-ADM MODULE: ${MODULENAME} ${VERSION}${NC}"
+echo NODECTL: ${NODECTL}
+echo NODE: ${NODE}
+echo
+
+${NODECTL} ${NODE} "grep -F '^Cache=no-negative$' /etc/systemd/resolved.conf" || \
+${NODECTL} ${NODE} "echo 'Cache=no-negative' | sudo tee -a /etc/systemd/resolved.conf;
+sudo ln -sf /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf ;
+sudo systemctl restart systemd-resolved;
+"
+
